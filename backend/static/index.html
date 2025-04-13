@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+</head>
+<body>
+<h1>Chat</h1>
+<input id="username" placeholder="Ваше имя"/>
+<input id="messageText" placeholder="Сообщение"/>
+<button onclick="sendMessage()">Отправить</button>
+<ul id="messages"></ul>
+
+<script>
+    const ws = new WebSocket("ws://localhost:8000/ws");
+    const messages = document.getElementById("messages");
+
+    ws.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const item = document.createElement("li");
+        item.textContent = `${data.username}: ${data.text}`;
+        messages.appendChild(item);
+    };
+
+    function sendMessage() {
+        const username = document.getElementById("username").value || "Аноним";
+        const text = document.getElementById("messageText").value;
+        ws.send(JSON.stringify({username, text}));
+        document.getElementById("messageText").value = "";
+    }
+</script>
+</body>
+</html>

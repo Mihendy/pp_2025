@@ -1,0 +1,33 @@
+name: pp_2025
+services:
+  backend:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/backend
+    working_dir: /backend
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn chat_app.main:app --reload --host 0.0.0.0
+    ports:
+      - "8000:8000"
+  db:
+    build:
+      context: ./db
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  pg_data:
