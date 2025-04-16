@@ -1,8 +1,8 @@
+from auth.schemas import UserLogin, UserRegister
 from auth.tables import User
 from auth.utils import hash_password, verify_password
 from database import database
 from fastapi import APIRouter, HTTPException
-from auth.schemas import UserLogin, UserRegister
 from starlette import status
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
