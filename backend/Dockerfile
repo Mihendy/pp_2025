@@ -21,4 +21,4 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Копирование проекта
 COPY . .
 
-WORKDIR /backend
+WORKDIR /backend/src

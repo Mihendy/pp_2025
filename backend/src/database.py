@@ -1,6 +1,6 @@
+from config import DATABASE_URL
 from databases import Database
-from sqlalchemy import create_engine, MetaData
-from chat_app.config import DATABASE_URL
+from sqlalchemy import MetaData, create_engine
 
 database = Database(DATABASE_URL)
 metadata = MetaData()
