@@ -16,6 +16,7 @@ Chat = Table(
     "chats",
     metadata,
     Column("id", Integer, primary_key=True),
+    Column("owner_id", Integer, ForeignKey("users.id"), nullable=False),
     Column("name", String, nullable=False),
     Column("description", String, nullable=True),
     *timestamp_columns(),
