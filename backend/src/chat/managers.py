@@ -1,10 +1,10 @@
+from typing import Dict, List
+
 from chat.tables import ChatMember
 from database import database
-
-
-from fastapi import WebSocket, HTTPException
+from fastapi import HTTPException, WebSocket
 from sqlalchemy import select
-from typing import List, Dict
+
 
 class WSChatConnectionManager:
     def __init__(self):

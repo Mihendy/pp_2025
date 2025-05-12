@@ -1,7 +1,5 @@
 from datetime import datetime
-
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
-from sqlalchemy import select
+from typing import List
 
 from auth.tables import User
 from auth.utils import get_current_user
@@ -10,6 +8,9 @@ from chat.schemas import ChatCreate
 from chat.tables import Chat, ChatMember, Message
 from chat.utils import get_chat_if_member
 from database import database
+from fastapi import (APIRouter, Depends, HTTPException, WebSocket,
+                     WebSocketDisconnect)
+from sqlalchemy import select
 
 router = APIRouter(prefix="/chats", tags=["chats"])
 manager = WSChatConnectionManager()
@@ -48,7 +49,7 @@ async def get_messages(
     limit: int = 50,
 ):
     """Получить сообщения из чата"""
-    query = select([Message]).where(Message.c.chat_id == chat.id).offset(skip).limit(limit)
+    query = select(Message).where(Message.c.chat_id == chat.id).offset(skip).limit(limit)
     messages = await database.fetch_all(query)
     return messages
 
@@ -115,8 +116,9 @@ async def remove_member(
     return {"message": "User removed from chat"}
 
 
-from fastapi import WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
+
 
 @router.websocket("/ws/{chat_id}/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: int):
