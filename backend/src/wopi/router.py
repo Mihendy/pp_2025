@@ -10,6 +10,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse
 
 from config import S3_CLIENT, WOPI_BUCKET
+from file_permission.schemas import RIGHT_TYPES
+from file_permission.utils import add_permission, check_file_access, get_file_owner_id
 
 logging.basicConfig(
     format='%(levelname)s:     %(message)s',
@@ -52,7 +54,9 @@ async def file_info(file_path: str, access_token: str):
 
     user = await get_user_by_token(access_token)
 
-    # TODO: сделать проверку на то, имеет ли user доступ к файлу и какие у него права
+
+    can_write = await check_file_access(file_path, user.id, RIGHT_TYPES.EDITOR)
+    owner_id = await get_file_owner_id(file_path)
 
     key = unquote(file_path)
 
@@ -64,10 +68,10 @@ async def file_info(file_path: str, access_token: str):
     return JSONResponse({
         "BaseFileName": Path(key).name,
         "Size": metadata["ContentLength"],
-        "OwnerId": "admin",
+        "OwnerId": owner_id,
         "UserId": user.id,
         "Version": "1",
-        "UserCanWrite": True,
+        "UserCanWrite": can_write,
         "UserFriendlyName": user.email,
     })
 
@@ -79,10 +83,10 @@ async def file_create(file_path: str, access_token: str):
     if not access_token:
         raise HTTPException(status_code=401, detail="Missing token")
 
-    user = get_user_by_token(access_token)
+    user = await get_user_by_token(access_token)
     key = unquote(file_path)
 
-    # TODO: сделать запись в бд (нужна новая таблица), в которой будет s3_path (key), user_id (user.id), status (owner, editor, viewer)
+    perm_id = await add_permission(file_path, user.id, RIGHT_TYPES.OWNER)
 
     file_exists = False
     try:

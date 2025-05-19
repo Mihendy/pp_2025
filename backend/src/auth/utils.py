@@ -100,7 +100,7 @@ async def get_user_by_token(access_token: str) -> User:
             detail="User not found"
         )
     return user
-x
+
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """

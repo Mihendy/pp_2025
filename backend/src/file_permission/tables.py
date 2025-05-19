@@ -7,7 +7,7 @@ class RightsType(str, PyEnum):
     EDITOR = "editor"
     VIEWER = "viewer"
 
-file_permissions = Table(
+FilePermissions = Table(
     "file_permissions",
     metadata,
     Column("id", Integer, primary_key=True),
