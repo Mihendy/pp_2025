@@ -6,11 +6,15 @@ from fastapi.security import HTTPAuthorizationCredentials
 from auth.routes import router as auth_router
 from auth.utils import security, get_user_by_token
 from chat.routes import router as chat_router
+from file_permission.routes import router as file_permission_router
 from config import SUPPORTED_COLLABORA_EXTENSIONS, WOPI_BUCKET
 from database import create_tables, database
 from bucket import create_bucket_if_not_exists
 from fastapi import FastAPI, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
+
+from file_permission.schemas import RIGHT_TYPES
+from file_permission.utils import check_file_access
 from wopi.router import router as wopi_router
 
 
@@ -27,6 +31,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
 app.include_router(chat_router, prefix="/api/v1", tags=["chats"])
 app.include_router(wopi_router, prefix="/api/v1", tags=["wopi"])
+app.include_router(file_permission_router, prefix="/api/v1", tags=["file_permission"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -47,6 +52,9 @@ async def get_collabora_url(file_path: str = Query(...), credentials: HTTPAuthor
     ext = Path(file_path).suffix.lower()
     token = credentials.credentials
     user = await get_user_by_token(token)
+
+    if not await check_file_access(file_path, user.id, RIGHT_TYPES.VIEWER):
+        raise HTTPException(status_code=403)
 
     if ext not in SUPPORTED_COLLABORA_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"Unsupported file extension: {ext}")

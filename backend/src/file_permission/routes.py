@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth.utils import get_current_user
 from auth.tables import User
-from utils import add_permission, remote_permission, check_file_access
-from schemas import RIGHT_TYPES
+from file_permission.utils import add_permission, revoke_permission, check_file_access
+from file_permission.schemas import RIGHT_TYPES
 
 router = APIRouter(prefix="/rights")
 
@@ -31,7 +31,7 @@ async def revoke_permission_api(
     if not await check_file_access(file_path, current_user.id, RIGHT_TYPES.OWNER):
         raise HTTPException(403, detail="Только владелец может отзывать права")
 
-    success = await remote_permission(file_path, user_id)
+    success = await revoke_permission(file_path, user_id)
     if not success:
         raise HTTPException(404, detail="Право не найдено")
     return {"status": "ok"}
