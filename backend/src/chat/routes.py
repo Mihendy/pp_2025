@@ -12,6 +12,8 @@ from fastapi import (APIRouter, Depends, HTTPException, WebSocket,
                      WebSocketDisconnect)
 from sqlalchemy import select
 
+from models.utils import MessageResponse
+
 router = APIRouter(prefix="/chats", tags=["chats"])
 manager = WSChatConnectionManager()
 
@@ -54,7 +56,13 @@ async def get_messages(
     return messages
 
 
-@router.post("/{chat_id}/members")
+@router.post("/{chat_id}/members",
+    response_model=MessageResponse,
+    responses={
+        400: {"description": "User is already a member of the chat"},
+        403: {"description": "Not authorized to add members to this chat"},
+        404: {"description": "Chat not found"},
+    })
 async def add_member(
         chat_id: int,
         user_id: int,
@@ -85,7 +93,13 @@ async def add_member(
     return {"message": "User added to chat"}
 
 
-@router.delete("/{chat_id}/members/{user_id}")
+@router.delete("/{chat_id}/members/{user_id}",
+    response_model=MessageResponse,
+    responses={
+        400: {"description": "User is not in this chat"},
+        403: {"description": "Not authorized to remove this user from the chat"},
+        404: {"description": "Chat not found"},
+    })
 async def remove_member(
         chat_id: int,
         user_id: int,

@@ -11,11 +11,6 @@ class UserLogin(BaseModel):
     email: EmailStr
     password:str
 
-class Token(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str
-
 class AuthResponse(BaseModel):
     message: str
     access_token: str

@@ -7,6 +7,7 @@ from auth.routes import router as auth_router
 from auth.utils import security, get_user_by_token
 from chat.routes import router as chat_router
 from file_permission.routes import router as file_permission_router
+from groups.routes import router as groups_router
 from config import SUPPORTED_COLLABORA_EXTENSIONS, WOPI_BUCKET
 from database import create_tables, database
 from bucket import create_bucket_if_not_exists
@@ -32,6 +33,7 @@ app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
 app.include_router(chat_router, prefix="/api/v1", tags=["chats"])
 app.include_router(wopi_router, prefix="/api/v1", tags=["wopi"])
 app.include_router(file_permission_router, prefix="/api/v1", tags=["file_permission"])
+app.include_router(groups_router, prefix="/api/v1", tags=["groups"])
 
 app.add_middleware(
     CORSMiddleware,

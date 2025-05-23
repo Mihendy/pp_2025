@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select, delete
+from sqlalchemy import select
 from database import database
 from groups.models import groups, user_groups, invitations
 
