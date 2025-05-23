@@ -1,4 +1,4 @@
-from auth.schemas import UserLogin, UserRegister, Token, AuthResponse
+from auth.schemas import UserLogin, UserRegister, AuthResponse
 from auth.tables import User
 from auth.utils import (create_access_token, create_refresh_token,
                         decode_token, hash_password, verify_password)
@@ -54,7 +54,7 @@ async def login(user: UserLogin):
                         token_type="bearer")
 
 
-@router.post("/refresh", response_model=Token)
+@router.post("/refresh", response_model=AuthResponse)
 async def refresh(refresh_token: str):
     """
     Обновляет access и refresh токены, если refresh токен валиден.
