@@ -33,10 +33,11 @@ services:
     build:
       context: ./frontend
     volumes:
-      - ./frontend/src:/frontend/src
+      - ./frontend:/app
+      - /app/node_modules
     ports:
       - "80:80"
     depends_on:
       - backend
 volumes:
-  pg_data:
+  pg_data:  

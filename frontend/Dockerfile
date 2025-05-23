@@ -1,4 +1,5 @@
-FROM node:18 AS build
+# frontend/Dockerfile
+FROM node:20
 
 WORKDIR /app
 
@@ -9,10 +10,7 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:alpine
+# Установим простой сервер для отдачи сборки
+RUN npm install -g serve
 
-COPY --from=build /app/build /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist", "-l", "80"]
