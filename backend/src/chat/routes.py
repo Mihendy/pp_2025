@@ -1,7 +1,5 @@
 from datetime import datetime
-
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
-from sqlalchemy import select
+from typing import List
 
 from auth.tables import User
 from auth.utils import get_current_user
@@ -10,6 +8,11 @@ from chat.schemas import ChatCreate
 from chat.tables import Chat, ChatMember, Message
 from chat.utils import get_chat_if_member
 from database import database
+from fastapi import (APIRouter, Depends, HTTPException, WebSocket,
+                     WebSocketDisconnect)
+from sqlalchemy import select
+
+from models.utils import MessageResponse
 
 router = APIRouter(prefix="/chats", tags=["chats"])
 manager = WSChatConnectionManager()
@@ -48,12 +51,18 @@ async def get_messages(
     limit: int = 50,
 ):
     """Получить сообщения из чата"""
-    query = select([Message]).where(Message.c.chat_id == chat.id).offset(skip).limit(limit)
+    query = select(Message).where(Message.c.chat_id == chat.id).offset(skip).limit(limit)
     messages = await database.fetch_all(query)
     return messages
 
 
-@router.post("/{chat_id}/members")
+@router.post("/{chat_id}/members",
+    response_model=MessageResponse,
+    responses={
+        400: {"description": "User is already a member of the chat"},
+        403: {"description": "Not authorized to add members to this chat"},
+        404: {"description": "Chat not found"},
+    })
 async def add_member(
         chat_id: int,
         user_id: int,
@@ -84,7 +93,13 @@ async def add_member(
     return {"message": "User added to chat"}
 
 
-@router.delete("/{chat_id}/members/{user_id}")
+@router.delete("/{chat_id}/members/{user_id}",
+    response_model=MessageResponse,
+    responses={
+        400: {"description": "User is not in this chat"},
+        403: {"description": "Not authorized to remove this user from the chat"},
+        404: {"description": "Chat not found"},
+    })
 async def remove_member(
         chat_id: int,
         user_id: int,
@@ -115,8 +130,9 @@ async def remove_member(
     return {"message": "User removed from chat"}
 
 
-from fastapi import WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
+
 
 @router.websocket("/ws/{chat_id}/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: int):

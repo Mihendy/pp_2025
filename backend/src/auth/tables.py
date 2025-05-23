@@ -1,6 +1,7 @@
 from database import metadata
 from sqlalchemy import Column, Integer, String, Table
 
+
 User = Table(
     "users",
     metadata,

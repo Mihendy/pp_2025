@@ -18,7 +18,7 @@ services:
     build:
       context: ./db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     env_file:
       - .env
     volumes:
@@ -39,5 +39,38 @@ services:
       - "80:80"
     depends_on:
       - backend
+
+  collabora:
+    image: collabora/code
+    container_name: collabora
+    environment:
+      - domain=backend
+      - username=${COLLABORA_USERNAME}
+      - password=${COLLABORA_PASSWORD}
+    ports:
+      - "9980:9980"
+    command: >
+      --o:ssl.enable=false
+      --o:ssl.termination=false
+      --o:trusted.hosts=backend
+    restart: always
+    volumes:
+      - collabora_data:/data
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+
+
 volumes:
-  pg_data:  
+  pg_data:
+  collabora_data:
+  minio_data:
