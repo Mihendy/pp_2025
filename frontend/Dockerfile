@@ -1,5 +1,4 @@
-# frontend/Dockerfile
-FROM node:20
+FROM node:20 AS build
 
 WORKDIR /app
 
@@ -7,10 +6,16 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-
 RUN npm run build
 
-# Установим простой сервер для отдачи сборки
+# Production image
+FROM node:20
+
+WORKDIR /app
+
 RUN npm install -g serve
 
+COPY --from=build /app/dist ./dist
+
+EXPOSE 80
 CMD ["serve", "-s", "dist", "-l", "80"]
