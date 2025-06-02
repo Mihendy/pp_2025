@@ -1,21 +1,22 @@
+// src/App.tsx
 import React, { useState } from 'react';
-import './App.css';
-import { Link } from 'react-router-dom';
+import './css/App.css';
+import { Link, useNavigate } from 'react-router-dom';
 
 const App: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Email:', email);
-        console.log('Password:', password);
+    const navigate = useNavigate();
+
+    const handleTestLogin = () => {
+        navigate('/dashboard');
     };
 
     return (
         <div className="login-container">
             <h1 className="welcome-text">ДОБРО ПОЖАЛОВАТЬ!</h1>
-            <form onSubmit={handleSubmit}>
+            <form>
                 <label className="label">Почта</label>
                 <input
                     type="email"
@@ -34,8 +35,8 @@ const App: React.FC = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <button type="submit" className="submit-button">
-                    Войти
+                <button type="button" className="test-login-button" onClick={handleTestLogin}>
+                    Войти (тест)
                 </button>
             </form>
 

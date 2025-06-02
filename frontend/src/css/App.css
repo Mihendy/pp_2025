@@ -1,15 +1,27 @@
-.register-container {
-    background: linear-gradient(135deg, #8e2de2, #b36af7); /* Градиентный фиолетовый блок */
+/* src/css/App.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    background: linear-gradient(135deg, #8e2de2, #b36af7);
     border-radius: 20px;
     padding: 40px;
     text-align: center;
     color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     width: 600px;
-    height: 500px;
+    height: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
 }
 
@@ -37,31 +49,25 @@
     font-size: 16px;
 }
 
-.next-button {
-    margin-top: 20px;
-    width: 100%;
-    height: 50px;
+.test-login-button {
+    display: block;
+    margin: 30px auto 0;
+    padding: 10px 20px;
     background-color: white;
     color: #8e2de2;
     border: none;
     border-radius: 20px;
     cursor: pointer;
     font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: background-color 0.3s ease;
-    /* Для тестирования */
-    border: 2px solid red; /* Видимая граница */
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); /* Лёгкое свечение */
 }
 
-.arrow-icon {
-    margin-left: 5px;
-    font-size: 18px;
+.test-login-button:hover {
+    background-color: #f0f0f0;
 }
-.error-message {
-    color: red;
-    font-size: 14px;
-    margin-bottom: 10px;
+
+.register-link {
+    color: white;
+    margin-top: 20px;
+    cursor: pointer;
 }

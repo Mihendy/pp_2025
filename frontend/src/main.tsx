@@ -1,21 +1,19 @@
+// src/main.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
-import Register from './Register'; // ✅ Импортируем Register
+import RegisterPage from './pages/RegisterPage';
+import { DashboardPage } from './pages/DashboardPage'; 
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
-
-root.render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Router>
+    <BrowserRouter>
       <Routes>
-        {/* Главная страница */}
         <Route path="/" element={<App />} />
-
-        {/* Страница регистрации */}
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   </React.StrictMode>
 );
