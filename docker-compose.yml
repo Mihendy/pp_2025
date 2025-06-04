@@ -12,7 +12,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./backend:/code  # Монтируем весь бэкенд в /code
+      - ./backend:/code
     working_dir: /code
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
@@ -43,9 +43,14 @@ services:
       context: ./frontend
     container_name: react-frontend
     ports:
-      - "80:80"
+      - "5173:80"  # ✅ Добавлен порт
     env_file:
       - .env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: npm run dev -- --host 0.0.0.0 --port 80
     depends_on:
       - backend
     restart: unless-stopped
