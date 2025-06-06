@@ -36,7 +36,11 @@ async def register(user: UserRegister):
                         token_type="bearer")
 
 
-@router.post("/login", response_model=AuthResponse)
+@router.post("/login",
+             response_model=AuthResponse,
+             responses={
+                 401: {"description": "Неверный email или пароль"},
+             })
 async def login(user: UserLogin):
     email = user.email
     password = user.password
@@ -54,7 +58,31 @@ async def login(user: UserLogin):
                         token_type="bearer")
 
 
-@router.post("/refresh", response_model=AuthResponse)
+@router.post("/refresh",
+             response_model=AuthResponse,
+             responses={
+                 401: {
+                     "description": "Ошибки авторизации",
+                     "content": {
+                         "application/json": {
+                             "examples": {
+                                 "invalid_token_type": {
+                                     "summary": "Неверный тип токена",
+                                     "value": {"detail": "Ожидался refresh токен"},
+                                 },
+                                 "missing_subject": {
+                                     "summary": "Отсутствует идентификатор пользователя",
+                                     "value": {"detail": "Токен не содержит информации о пользователе"},
+                                 },
+                                 "user_not_found": {
+                                     "summary": "Пользователь не существует",
+                                     "value": {"detail": "Пользователь не найден"},
+                                 }
+                             }
+                         }
+                     }
+                 }
+             })
 async def refresh(refresh_token: str):
     """
     Обновляет access и refresh токены, если refresh токен валиден.
