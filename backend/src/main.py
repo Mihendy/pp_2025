@@ -3,11 +3,11 @@ from pathlib import Path
 
 from fastapi.security import HTTPAuthorizationCredentials
 
-from auth.routes import router as auth_router
+from auth.routes import auth_router, user_router
 from auth.utils import security, get_user_by_token
 from chat.routes import router as chat_router
 from file_permission.routes import router as file_permission_router
-from groups.routes import router as groups_router
+from groups.routes import groups_router, invites_router
 from config import SUPPORTED_COLLABORA_EXTENSIONS, WOPI_BUCKET
 from database import create_tables, database
 from bucket import create_bucket_if_not_exists
@@ -30,10 +30,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
+
+app.include_router(user_router, prefix="/api/v1", tags=["users"])
 app.include_router(chat_router, prefix="/api/v1", tags=["chats"])
 app.include_router(wopi_router, prefix="/api/v1", tags=["wopi"])
 app.include_router(file_permission_router, prefix="/api/v1", tags=["file_permission"])
 app.include_router(groups_router, prefix="/api/v1", tags=["groups"])
+app.include_router(invites_router, prefix="/api/v1", tags=["invites"])
 
 app.add_middleware(
     CORSMiddleware,

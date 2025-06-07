@@ -7,7 +7,7 @@ from file_permission.schemas import RIGHT_TYPES
 router = APIRouter(prefix="/rights")
 
 @router.post("/")
-async def grant_permission_api(
+async def grant_file_permission(
     file_path: str,
     user_id: int,
     rights_type: RIGHT_TYPES,
@@ -23,7 +23,7 @@ async def grant_permission_api(
         raise HTTPException(400, detail=str(e))
 
 @router.delete("/{file_path}/{user_id}")
-async def revoke_permission_api(
+async def revoke_file_permission(
     file_path: str,
     user_id: int,
     current_user: User = Depends(get_current_user),

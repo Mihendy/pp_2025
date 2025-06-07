@@ -22,9 +22,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/wopi", tags=["wopi"])
 
 
-@router.get("/files/{file_path:path}/contents")
+@router.get("/files/{file_path:path}/contents", include_in_schema=False)
 def file_contents(file_path: str, access_token: str):
-    print(file_path)
     obj = S3_CLIENT.get_object(Bucket=WOPI_BUCKET, Key=file_path)
     return StreamingResponse(
         obj['Body'],
@@ -33,15 +32,13 @@ def file_contents(file_path: str, access_token: str):
     )
 
 
-@router.post("/files/{file_path:path}/contents")
+@router.post("/files/{file_path:path}/contents", include_in_schema=False)
 async def file_contents(file_path: str, request: Request, access_token: str):
     content = await request.body()
-
     try:
         S3_CLIENT.put_object(Bucket=WOPI_BUCKET, Key=file_path, Body=content)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error writing file to S3: " + str(e))
-
     return Response(status_code=200)
 
 

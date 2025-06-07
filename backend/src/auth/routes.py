@@ -1,15 +1,17 @@
-from auth.schemas import UserLogin, UserRegister, AuthResponse
+from auth.schemas import UserLogin, UserRegister, AuthResponse, UserInfo
 from auth.tables import User
 from auth.utils import (create_access_token, create_refresh_token,
-                        decode_token, hash_password, verify_password)
+                        decode_token, hash_password, verify_password, get_current_user)
 from database import database
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from starlette import status
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+from groups.tables import Groups, UserGroups
+
+auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register",
+@auth_router.post("/register",
              response_model=AuthResponse,
              responses={
                  400: {"description": "Пароли не совпадают"},
@@ -28,15 +30,16 @@ async def register(user: UserRegister):
         raise HTTPException(status_code=409, detail="Пользователь с таким email уже существует")
 
     hashed_password = hash_password(user.password)
-    await database.execute(User.insert().values(email=user.email, hashed_password=hashed_password))
+    user_id = await database.execute(User.insert().values(email=user.email, hashed_password=hashed_password))
 
     return AuthResponse(message="Пользователь успешно зарегистрирован",
                         access_token=create_access_token(str(user.email)),
                         refresh_token=create_refresh_token(str(user.email)),
-                        token_type="bearer")
+                        token_type="bearer",
+                        user_id=user_id)
 
 
-@router.post("/login",
+@auth_router.post("/login",
              response_model=AuthResponse,
              responses={
                  401: {"description": "Неверный email или пароль"},
@@ -55,10 +58,11 @@ async def login(user: UserLogin):
     return AuthResponse(message="Успешный вход в систему",
                         access_token=create_access_token(str(user.email)),
                         refresh_token=create_refresh_token(str(user.email)),
-                        token_type="bearer")
+                        token_type="bearer",
+                        user_id=existing_user.id)
 
 
-@router.post("/refresh",
+@auth_router.post("/refresh",
              response_model=AuthResponse,
              responses={
                  401: {
@@ -112,4 +116,28 @@ async def refresh(refresh_token: str):
     return AuthResponse(message="Токены успешно обновлены",
                         access_token=create_access_token(str(email)),
                         refresh_token=create_refresh_token(str(email)),
-                        token_type="bearer")
+                        token_type="bearer",
+                        user_id=existing_user.id)
+
+user_router = APIRouter(prefix="/users", tags=["users"])
+
+@user_router.get("/me/", response_model=UserInfo)
+async def get_user(current_user=Depends(get_current_user)):
+    user_id = current_user.id
+
+    creator_rows = await database.fetch_all(
+        query=Groups.select().with_only_columns(Groups.c.id).where(Groups.c.creator_id == user_id)
+    )
+    group_creator_ids = [row.id for row in creator_rows]
+
+    member_rows = await database.fetch_all(
+        query=UserGroups.select().with_only_columns(UserGroups.c.group_id).where(UserGroups.c.user_id == user_id)
+    )
+    group_member_ids = [row.group_id for row in member_rows]
+
+    return UserInfo(
+        email=current_user.email,
+        id=user_id,
+        group_creator_ids=group_creator_ids,
+        group_member_ids=group_member_ids,
+    )
