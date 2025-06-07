@@ -11,3 +11,6 @@ def timestamp_columns():
 
 class MessageResponse(BaseModel):
     message: str
+
+class DetailResponse(BaseModel):
+    detail: str

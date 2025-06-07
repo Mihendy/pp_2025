@@ -1,5 +1,6 @@
 from auth.tables import User
 from auth.utils import get_current_user
+from chat.schemas import ChatResponse
 from chat.tables import Chat, ChatMember
 from database import database
 from fastapi import Depends, HTTPException
@@ -31,4 +32,4 @@ async def get_chat_if_member(
             detail="Chat not found"
         )
 
-    return chat
+    return ChatResponse(**chat)

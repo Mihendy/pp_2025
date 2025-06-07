@@ -9,6 +9,7 @@ class GroupResponse(BaseModel):
     id: int
     name: str
     creator_id: int
+    members: list[int] = []
 
 class InviteStatus(str, Enum):
     PENDING = "pending"

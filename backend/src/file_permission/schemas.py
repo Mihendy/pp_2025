@@ -15,4 +15,12 @@ class FilePermission(BaseModel):
     file_path: str
     user_id: str
 
-file_permissions_db: List[FilePermission] = []
+
+class FilePermissionGrant(BaseModel):
+    file_path: str
+    user_id: int
+    rights_type: RIGHT_TYPES
+
+class FilePermissionRevoke(BaseModel):
+    file_path: str
+    user_id: int

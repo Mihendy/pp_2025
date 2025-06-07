@@ -12,12 +12,12 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @auth_router.post("/register",
-             response_model=AuthResponse,
-             responses={
-                 400: {"description": "Пароли не совпадают"},
-                 403: {"description": "Разрешен доступ только для студентов УрФУ"},
-                 409: {"description": "Пользователь с таким email уже существует"}
-             })
+                  response_model=AuthResponse,
+                  responses={
+                      400: {"description": "Пароли не совпадают"},
+                      403: {"description": "Разрешен доступ только для студентов УрФУ"},
+                      409: {"description": "Пользователь с таким email уже существует"}
+                  })
 async def register(user: UserRegister):
     if not str(user.email).endswith('@urfu.me'):
         raise HTTPException(status_code=403, detail="Разрешен доступ только для студентов УрФУ")
@@ -40,10 +40,10 @@ async def register(user: UserRegister):
 
 
 @auth_router.post("/login",
-             response_model=AuthResponse,
-             responses={
-                 401: {"description": "Неверный email или пароль"},
-             })
+                  response_model=AuthResponse,
+                  responses={
+                      401: {"description": "Неверный email или пароль"},
+                  })
 async def login(user: UserLogin):
     email = user.email
     password = user.password
@@ -63,30 +63,30 @@ async def login(user: UserLogin):
 
 
 @auth_router.post("/refresh",
-             response_model=AuthResponse,
-             responses={
-                 401: {
-                     "description": "Ошибки авторизации",
-                     "content": {
-                         "application/json": {
-                             "examples": {
-                                 "invalid_token_type": {
-                                     "summary": "Неверный тип токена",
-                                     "value": {"detail": "Ожидался refresh токен"},
-                                 },
-                                 "missing_subject": {
-                                     "summary": "Отсутствует идентификатор пользователя",
-                                     "value": {"detail": "Токен не содержит информации о пользователе"},
-                                 },
-                                 "user_not_found": {
-                                     "summary": "Пользователь не существует",
-                                     "value": {"detail": "Пользователь не найден"},
-                                 }
-                             }
-                         }
-                     }
-                 }
-             })
+                  response_model=AuthResponse,
+                  responses={
+                      401: {
+                          "description": "Ошибки авторизации",
+                          "content": {
+                              "application/json": {
+                                  "examples": {
+                                      "invalid_token_type": {
+                                          "summary": "Неверный тип токена",
+                                          "value": {"detail": "Ожидался refresh токен"},
+                                      },
+                                      "missing_subject": {
+                                          "summary": "Отсутствует идентификатор пользователя",
+                                          "value": {"detail": "Токен не содержит информации о пользователе"},
+                                      },
+                                      "user_not_found": {
+                                          "summary": "Пользователь не существует",
+                                          "value": {"detail": "Пользователь не найден"},
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  })
 async def refresh(refresh_token: str):
     """
     Обновляет access и refresh токены, если refresh токен валиден.
@@ -119,9 +119,11 @@ async def refresh(refresh_token: str):
                         token_type="bearer",
                         user_id=existing_user.id)
 
+
 user_router = APIRouter(prefix="/users", tags=["users"])
 
-@user_router.get("/me/", response_model=UserInfo)
+
+@user_router.get("/me/", response_model=UserInfo, responses={401: {"description": "Неавторизованный доступ"}})
 async def get_user(current_user=Depends(get_current_user)):
     user_id = current_user.id
 
@@ -141,3 +143,56 @@ async def get_user(current_user=Depends(get_current_user)):
         group_creator_ids=group_creator_ids,
         group_member_ids=group_member_ids,
     )
+
+
+@user_router.get("/{user_id}/", response_model=UserInfo,
+                 responses={404: {"description": "Пользователь не найден"}})
+async def get_user_by_id(user_id: int):
+    user = await database.fetch_one(User.select().where(User.c.id == user_id))
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    creator_rows = await database.fetch_all(
+        query=Groups.select().with_only_columns(Groups.c.id).where(Groups.c.creator_id == user_id)
+    )
+    group_creator_ids = [row.id for row in creator_rows]
+
+    member_rows = await database.fetch_all(
+        query=UserGroups.select().with_only_columns(UserGroups.c.group_id).where(UserGroups.c.user_id == user_id)
+    )
+    group_member_ids = [row.group_id for row in member_rows]
+
+    return UserInfo(
+        email=user.email,
+        id=user.id,
+        group_creator_ids=group_creator_ids,
+        group_member_ids=group_member_ids,
+    )
+
+
+@user_router.get("/", response_model=list[UserInfo])
+async def get_all_users():
+    users = await database.fetch_all(User.select())
+    if not users:
+        return []
+
+    user_info_list = []
+    for user in users:
+        creator_rows = await database.fetch_all(
+            query=Groups.select().with_only_columns(Groups.c.id).where(Groups.c.creator_id == user.id)
+        )
+        group_creator_ids = [row.id for row in creator_rows]
+
+        member_rows = await database.fetch_all(
+            query=UserGroups.select().with_only_columns(UserGroups.c.group_id).where(UserGroups.c.user_id == user.id)
+        )
+        group_member_ids = [row.group_id for row in member_rows]
+
+        user_info_list.append(UserInfo(
+            email=user.email,
+            id=user.id,
+            group_creator_ids=group_creator_ids,
+            group_member_ids=group_member_ids,
+        ))
+
+    return user_info_list

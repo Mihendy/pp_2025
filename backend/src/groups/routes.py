@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from collections import defaultdict
 
-import groups
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select, delete
+
 from auth.tables import User
 from database import database
 from groups.tables import Invitations, Groups, UserGroups
-from groups.utils import create_group, delete_group, update_invite_status, check_success
+from groups.utils import create_group, update_invite_status, check_success
 from groups.schemas import GroupCreate, GroupResponse, InviteResponse, InviteStatus, InviteCreate
 from auth.utils import get_current_user
+from models.utils import DetailResponse
 
 groups_router = APIRouter(prefix="/groups")
 
@@ -17,6 +19,78 @@ async def create_new_group(group: GroupCreate, current_user=Depends(get_current_
     group_id = await create_group(group.name, current_user.id)
     return GroupResponse(id=group_id, name=group.name, creator_id=current_user.id)
 
+async def enrich_groups_with_members(groups_list: list[dict]) -> list[GroupResponse]:
+    if not groups_list:
+        return []
+
+    group_ids = [group["id"] for group in groups_list]
+
+    # Получаем всех участников этих групп
+    members_query = UserGroups.select().where(UserGroups.c.group_id.in_(group_ids))
+    members = await database.fetch_all(members_query)
+
+    # Словарь group_id -> список user_id
+    members_map = defaultdict(list)
+    for record in members:
+        members_map[record["group_id"]].append(record["user_id"])
+
+    # Формируем итоговый ответ
+    return [
+        GroupResponse(
+            id=group["id"],
+            name=group["name"],
+            creator_id=group["creator_id"],
+            members=members_map.get(group["id"], [])
+        )
+        for group in groups_list
+    ]
+
+@groups_router.get("/member/", response_model=list[GroupResponse])
+async def get_user_groups(current_user=Depends(get_current_user)):
+    """Получить все группы, в которых состоит пользователь"""
+    query = select(Groups).join(UserGroups).where(UserGroups.c.user_id == current_user.id)
+    groups_list = await database.fetch_all(query)
+    return await enrich_groups_with_members([dict(row._mapping) for row in groups_list])
+
+@groups_router.get("/creator/", response_model=list[GroupResponse])
+async def get_created_groups(current_user=Depends(get_current_user)):
+    """Получить все группы, созданные пользователем"""
+    query = select(Groups).where(Groups.c.creator_id == current_user.id)
+    groups_list = await database.fetch_all(query)
+    return await enrich_groups_with_members([dict(row._mapping) for row in groups_list])
+
+@groups_router.get("/all/", response_model=list[GroupResponse])
+async def get_all_groups():
+    """Получить все группы"""
+    query = select(Groups)
+    groups_list = await database.fetch_all(query)
+    return await enrich_groups_with_members([dict(row._mapping) for row in groups_list])
+
+@groups_router.delete("/{group_id}/remove-member/{user_id}", response_model=DetailResponse, responses={
+    404: {"description": "Группа или пользователь не найдены"},
+})
+async def remove_user_from_group(
+    group_id: int,
+    user_id: int,
+):
+    """Удаление пользователя из группы (только создатель группы может удалять)"""
+
+    # Проверка: состоит ли пользователь в группе
+    link_query = select(UserGroups).where(
+        (UserGroups.c.group_id == group_id) & (UserGroups.c.user_id == user_id)
+    )
+    link = await database.fetch_one(link_query)
+
+    if not link:
+        raise HTTPException(status_code=404, detail="Пользователь не состоит в этой группе")
+
+    # Удаление
+    delete_query = delete(UserGroups).where(
+        (UserGroups.c.group_id == group_id) & (UserGroups.c.user_id == user_id)
+    )
+    await database.execute(delete_query)
+
+    return {"detail": f"Пользователь {user_id} удалён из группы {group_id}"}
 
 invites_router = APIRouter(prefix="/invites")
 
@@ -40,7 +114,14 @@ async def create_invite(invite: InviteCreate, current_user=Depends(get_current_u
             UserGroups.c.user_id == current_user.id
         )
     )
-    if not sender_member:
+
+    sender_owner = await database.fetch_one(
+        select(Groups).where(
+            Groups.c.id == invite.group_id,
+            Groups.c.creator_id == current_user.id
+        )
+    )
+    if not (sender_member or sender_owner):
         raise HTTPException(status_code=403, detail="You must be a member of the group to send invites.")
     recipient_exists = await database.fetch_val(select(User.c.id).where(User.c.id == invite.recipient_id))
     if not recipient_exists:
@@ -63,7 +144,7 @@ async def create_invite(invite: InviteCreate, current_user=Depends(get_current_u
     group_owner = await database.fetch_one(
         select(Groups).where(
             Groups.c.id == invite.group_id,
-            Groups.c.creator_id == current_user.id
+            Groups.c.creator_id == invite.recipient_id
         )
     )
 
