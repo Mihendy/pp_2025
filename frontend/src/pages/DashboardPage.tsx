@@ -1,6 +1,6 @@
 // src/pages/DashboardPage.tsx
 import React from 'react';
-import '@DashboardPage.css'; // Подключаем стили
+import '@/css/DashboardPage.css'; // Подключаем стили
 
 const DashboardPage: React.FC = () => {
   return (
