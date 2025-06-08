@@ -1,81 +1,45 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
-
+/* src/css/DashboardPage.css */
 .dashboard-container {
-    background-color: #000;
-    color: white;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  background-color: #8e2de2; /* Ярко-фиолетовый фон */
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.dashboard-header {
-    width: 100%;
-    max-width: 900px;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.dashboard-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.header-right .settings-button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: white;
-    transition: transform 0.2s ease;
+.dashboard-icon {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.header-right .settings-button:hover {
-    transform: rotate(90deg);
+.dashboard-icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-.dashboard-main {
-    flex: 1;
-    width: 100%;
-    max-width: 900px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.settings {
+  color: #b36af7; /* Светло-фиолетовый */
 }
 
-.chat-area {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    min-height: 300px;
+.news {
+  color: #f0f0f0; /* Белый */
 }
 
-.mini-apps {
-    width: 100%;
-    max-width: 900px;
-    padding: 20px;
-    background-color: rgba(142, 45, 226, 0.1);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mini-apps h2 {
-    margin-top: 0;
-}
-
-.mini-apps ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-.mini-apps li {
-    display: inline-block;
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 10px 15px;
-    margin-right: 10px;
-    border-radius: 10px;
-    font-size: 14px;
+.apps {
+  color: #fff; /* Белый */
 }

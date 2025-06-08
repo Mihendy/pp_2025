@@ -1,6 +1,9 @@
+// src/components/RegisterForm.tsx
+
 import React, { useState } from 'react';
-import type { RegisterRequest, RegisterResponse } from '../types/auth.types';
-import { registerUser } from '../api/authApi';
+import { registerUser } from '@/api/authApi';
+import type { RegisterRequest } from '@/types/auth.types';
+
 interface RegisterFormProps {
     onRegisterSuccess?: () => void;
 }
@@ -36,7 +39,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
             console.log('📤 Отправка данных:', formData);
             const result = await registerUser(formData);
             console.log('✅ Регистрация успешна:', result);
-            localStorage.setItem('access_token', result.access_token);
             if (onRegisterSuccess) onRegisterSuccess();
         } catch (err: any) {
             console.error('❌ Ошибка регистрации:', err.message);
@@ -47,17 +49,57 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {/* Поля формы */}
-            <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" />
-            <input name="password" type="password" value={formData.password} onChange={handleChange} placeholder="Пароль" />
-            <input name="password_confirm" type="password" value={formData.password_confirm} onChange={handleChange} placeholder="Подтвердите пароль" />
-            <button type="submit" disabled={isLoading}>
+        <form onSubmit={handleSubmit} className="register-form">
+            {error && <p className="error-message">{error}</p>}
+
+            <div className="input-group">
+                <label className="label">Почта</label>
+                <input
+                    name="email"
+                    type="email"
+                    className="input-field"
+                    placeholder="Введите почту"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                />
+            </div>
+
+            <div className="input-group">
+                <label className="label">Пароль</label>
+                <input
+                    name="password"
+                    type="password"
+                    className="input-field"
+                    placeholder="Введите пароль"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                    disabled={isLoading}
+                />
+            </div>
+
+            <div className="input-group">
+                <label className="label">Подтвердите пароль</label>
+                <input
+                    name="password_confirm"
+                    type="password"
+                    className="input-field"
+                    placeholder="Подтвердите пароль"
+                    value={formData.password_confirm}
+                    onChange={(e) => setFormData({ ...formData, password_confirm: e.target.value })}
+                    required
+                    disabled={isLoading}
+                />
+            </div>
+
+            <button type="submit" className="next-button" disabled={isLoading}>
                 {isLoading ? 'Загрузка...' : 'Продолжить'}
+                <i className="arrow-icon">&#8594;</i>
             </button>
         </form>
     );
 };
 
-export default RegisterForm;
+export { RegisterForm };
