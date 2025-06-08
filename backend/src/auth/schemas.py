@@ -16,6 +16,14 @@ class AuthResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    user_id: int
+
+class UserInfo(BaseModel):
+    id: int
+    email: EmailStr
+    group_member_ids: list[int]
+    group_creator_ids: list[int]
+
 
 
 

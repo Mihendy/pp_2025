@@ -1,8 +1,9 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Table, Column, Integer, String, ForeignKey
 from database import metadata
-from sqlalchemy.sql import func
+from groups.schemas import InviteStatus
+from models.utils import timestamp_columns
 
-groups = Table(
+Groups = Table(
     "groups",
     metadata,
     Column("id", Integer, primary_key=True),
@@ -10,21 +11,20 @@ groups = Table(
     Column("creator_id", Integer, ForeignKey("users.id"), nullable=False)
 )
 
-user_groups = Table(
+UserGroups = Table(
     "user_groups",
     metadata,
     Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
     Column("group_id", Integer, ForeignKey("groups.id"), primary_key=True)
 )
 
-
-invitations = Table(
+Invitations = Table(
     "invitations",
     metadata,
     Column("id", Integer, primary_key=True),
     Column("group_id", Integer, ForeignKey("groups.id"), nullable=False),
     Column("sender_id", Integer, ForeignKey("users.id"), nullable=False),
     Column("recipient_id", Integer, ForeignKey("users.id"), nullable=False),
-    Column("status", String, default="pending", nullable=False),
-    Column("created_at", DateTime, server_default=func.now())
+    Column("status", String, default=InviteStatus.PENDING, nullable=False),
+    *timestamp_columns(),
 )

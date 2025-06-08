@@ -4,7 +4,7 @@ from typing import List
 from auth.tables import User
 from auth.utils import get_current_user
 from chat.managers import WSChatConnectionManager
-from chat.schemas import ChatCreate
+from chat.schemas import ChatCreate, ChatResponse, ChatMessageResponse
 from chat.tables import Chat, ChatMember, Message
 from chat.utils import get_chat_if_member
 from database import database
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/chats", tags=["chats"])
 manager = WSChatConnectionManager()
 
 
-@router.get("/")
+@router.get("/", response_model=list[ChatResponse])
 async def get_chats(current_user: User = Depends(get_current_user)):
     """Получить список чатов, в которых состоит пользователь"""
     query = select(Chat.c.id, Chat.c.name, Chat.c.description).join(ChatMember).where(
@@ -27,7 +27,7 @@ async def get_chats(current_user: User = Depends(get_current_user)):
     return chats
 
 
-@router.post("/")
+@router.post("/", response_model=ChatResponse)
 async def create_chat(chat: ChatCreate, current_user: User = Depends(get_current_user)):
     """Создать новый чат"""
     current_user_id = current_user.id
@@ -35,20 +35,26 @@ async def create_chat(chat: ChatCreate, current_user: User = Depends(get_current
     chat_id = await database.execute(query)
     query = ChatMember.insert().values(chat_id=chat_id, user_id=current_user_id)
     await database.execute(query)
-    return {"chat_id": chat_id}
+    return ChatResponse(id=chat_id, name=chat.name, description=chat.description)
 
 
-@router.get("/{chat_id}")
+@router.get("/{chat_id}", response_model=ChatResponse,responses={
+    404: {"description": "Chat not found"},
+    403: {"description": "You are not a member of this chat"}})
 async def get_chat_info(chat=Depends(get_chat_if_member)):
     """Получить информацию о чате"""
     return chat
 
 
-@router.get("/{chat_id}/messages")
+@router.get("/{chat_id}/messages", response_model=List[ChatMessageResponse],
+            responses={
+                404: {"description": "Chat not found"},
+                403: {"description": "You are not a member of this chat"},
+            })
 async def get_messages(
-    chat=Depends(get_chat_if_member),  # проверка, является ли пользователь участником чата
-    skip: int = 0,
-    limit: int = 50,
+        chat=Depends(get_chat_if_member),  # проверка, является ли пользователь участником чата
+        skip: int = 0,
+        limit: int = 50,
 ):
     """Получить сообщения из чата"""
     query = select(Message).where(Message.c.chat_id == chat.id).offset(skip).limit(limit)
@@ -57,12 +63,12 @@ async def get_messages(
 
 
 @router.post("/{chat_id}/members",
-    response_model=MessageResponse,
-    responses={
-        400: {"description": "User is already a member of the chat"},
-        403: {"description": "Not authorized to add members to this chat"},
-        404: {"description": "Chat not found"},
-    })
+             response_model=MessageResponse,
+             responses={
+                 400: {"description": "User is already a member of the chat"},
+                 403: {"description": "Not authorized to add members to this chat"},
+                 404: {"description": "Chat not found"},
+             })
 async def add_member(
         chat_id: int,
         user_id: int,
@@ -94,12 +100,12 @@ async def add_member(
 
 
 @router.delete("/{chat_id}/members/{user_id}",
-    response_model=MessageResponse,
-    responses={
-        400: {"description": "User is not in this chat"},
-        403: {"description": "Not authorized to remove this user from the chat"},
-        404: {"description": "Chat not found"},
-    })
+               response_model=MessageResponse,
+               responses={
+                   400: {"description": "User is not in this chat"},
+                   403: {"description": "Not authorized to remove this user from the chat"},
+                   404: {"description": "Chat not found"},
+               })
 async def remove_member(
         chat_id: int,
         user_id: int,
@@ -163,4 +169,3 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: int):
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, chat_id)
-
