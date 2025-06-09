@@ -1,0 +1,112 @@
+.chat-window {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #242424;
+  color: white;
+  font-size: 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  overflow-y: auto;
+  transition: width 0.3s ease;
+  z-index: 1000;
+}
+
+.chat-window-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #333;
+}
+
+.close-button {
+  font-size: 18px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: white;
+}
+
+.new-chat-button {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #8e2de2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+}
+
+.new-chat-button:hover {
+  background-color: #b36af7;
+}
+
+.chat-search {
+  margin: 10px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.chat-categories {
+  padding: 10px;
+}
+
+.category-title {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.empty-category {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* Ресайз хэндлеры */
+.resize-handle {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.2);
+  z-index: 1001;
+}
+
+.resize-handle-left {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+.resize-handle-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.resize-handle-corner {
+  left: 0;
+  bottom: 0;
+  width: 15px;
+  height: 15px;
+  cursor: nwse-resize;
+  background-color: #8e2de2;
+  border-radius: 50%;
+}
