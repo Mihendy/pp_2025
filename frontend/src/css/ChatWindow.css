@@ -3,13 +3,14 @@
   top: 0;
   bottom: 0;
   right: 0;
-  background-color: #242424;
+  background-color: #242424; /* Темный фон */
   color: white;
   font-size: 14px;
   border-left: 1px solid rgba(255, 255, 255, 0.2);
   overflow-y: auto;
   transition: width 0.3s ease;
   z-index: 1000;
+  padding-bottom: 40px; /* Отступ для нижней панели */
 }
 
 .chat-window-header {
@@ -17,7 +18,8 @@
   justify-content: flex-end;
   align-items: center;
   padding: 10px 15px;
-  background-color: #333;
+  background-color: #333; /* Темно-серый заголовок */
+  cursor: default;
 }
 
 .close-button {
@@ -28,10 +30,18 @@
   color: white;
 }
 
+/* Форма создания нового чата */
+.chat-new-chat {
+  margin: 10px;
+  padding: 10px;
+  background-color: rgba(142, 45, 226, 0.1); /* Легкий фиолетовый акцент */
+  border-radius: 6px;
+}
+
 .new-chat-button {
   width: 100%;
   padding: 8px 12px;
-  background-color: #8e2de2;
+  background-color: #8e2de2; /* Ярко-фиолетовый */
   color: white;
   border: none;
   border-radius: 4px;
@@ -42,9 +52,58 @@
 }
 
 .new-chat-button:hover {
+  background-color: #b36af7; /* Светло-фиолетовый при наведении */
+}
+
+.new-chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.new-chat-input,
+.search-input {
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+  color: white;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+}
+
+.new-chat-submit,
+.cancel-button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.new-chat-submit {
+  background-color: #8e2de2;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.new-chat-submit:hover {
   background-color: #b36af7;
 }
 
+.cancel-button {
+  background-color: transparent;
+  color: #aaa;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 5px;
+}
+
+.cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Поиск */
 .chat-search {
   margin: 10px;
 }
@@ -59,6 +118,7 @@
   font-size: 13px;
 }
 
+/* Сортировка по времени */
 .chat-categories {
   padding: 10px;
 }
@@ -76,6 +136,31 @@
   color: #888;
   text-align: center;
   margin: 10px 0;
+}
+
+.chat-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  font-size: 13px;
+  transition: background-color 0.2s ease;
+}
+
+.chat-item strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.chat-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.error-message {
+  font-size: 12px;
+  color: red;
+  text-align: center;
+  margin-top: 5px;
 }
 
 /* Ресайз хэндлеры */

@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 // 🔐 Импорты для авторизации
 import type { LoginRequest } from '@/types/auth.types';
 import { loginUser } from '@/api/authApi';
+import { useAuth } from '@/hooks/useAuth';
 
 const App: React.FC = () => {
     const [email, setEmail] = useState('');
