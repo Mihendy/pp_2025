@@ -12,6 +12,8 @@ class ChatResponse(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
+    owner_id: int
+    members: list[int]
 
 class ChatMessageResponse(BaseModel):
     id: int

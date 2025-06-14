@@ -110,4 +110,4 @@ async def file_create(file_path: str, access_token: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error uploading file to S3: " + str(e))
 
-    return Response(status_code=201, content={"detail": "File created successfully"})
+    return JSONResponse(status_code=201, content={"detail": "File created successfully"})

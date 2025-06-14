@@ -21,10 +21,22 @@ manager = WSChatConnectionManager()
 @router.get("/", response_model=list[ChatResponse])
 async def get_chats(current_user: User = Depends(get_current_user)):
     """Получить список чатов, в которых состоит пользователь"""
-    query = select(Chat.c.id, Chat.c.name, Chat.c.description).join(ChatMember).where(
+    query = select(Chat.c.id, Chat.c.name, Chat.c.description, Chat.c.owner_id).join(ChatMember).where(
         ChatMember.c.user_id == current_user.id)
     chats = await database.fetch_all(query)
-    return chats
+    results = []
+    for chat in chats:
+        members_query = select(ChatMember.c.user_id).where(ChatMember.c.chat_id == chat["id"])
+        members = await database.fetch_all(members_query)
+        results.append({
+            "id": chat["id"],
+            "name": chat["name"],
+            "description": chat["description"],
+            "owner_id": chat["owner_id"],
+            "members": [m["user_id"] for m in members],
+        })
+    return results
+
 
 
 @router.post("/", response_model=ChatResponse)
@@ -35,7 +47,10 @@ async def create_chat(chat: ChatCreate, current_user: User = Depends(get_current
     chat_id = await database.execute(query)
     query = ChatMember.insert().values(chat_id=chat_id, user_id=current_user_id)
     await database.execute(query)
-    return ChatResponse(id=chat_id, name=chat.name, description=chat.description)
+    query = ChatMember.select().where(ChatMember.c.chat_id == chat_id)
+    members_result = await database.fetch_all(query)
+    members = [m["user_id"] for m in members_result]
+    return ChatResponse(id=chat_id, name=chat.name, description=chat.description, owner_id=current_user_id, members=members)
 
 
 @router.get("/{chat_id}", response_model=ChatResponse,responses={
