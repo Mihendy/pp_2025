@@ -19,6 +19,7 @@ async def create_new_group(group: GroupCreate, current_user=Depends(get_current_
     group_id = await create_group(group.name, current_user.id)
     return GroupResponse(id=group_id, name=group.name, creator_id=current_user.id)
 
+
 async def enrich_groups_with_members(groups_list: list[dict]) -> list[GroupResponse]:
     if not groups_list:
         return []
@@ -45,12 +46,14 @@ async def enrich_groups_with_members(groups_list: list[dict]) -> list[GroupRespo
         for group in groups_list
     ]
 
+
 @groups_router.get("/member/", response_model=list[GroupResponse])
 async def get_user_groups(current_user=Depends(get_current_user)):
     """Получить все группы, в которых состоит пользователь"""
     query = select(Groups).join(UserGroups).where(UserGroups.c.user_id == current_user.id)
     groups_list = await database.fetch_all(query)
     return await enrich_groups_with_members([dict(row._mapping) for row in groups_list])
+
 
 @groups_router.get("/creator/", response_model=list[GroupResponse])
 async def get_created_groups(current_user=Depends(get_current_user)):
@@ -59,6 +62,7 @@ async def get_created_groups(current_user=Depends(get_current_user)):
     groups_list = await database.fetch_all(query)
     return await enrich_groups_with_members([dict(row._mapping) for row in groups_list])
 
+
 @groups_router.get("/all/", response_model=list[GroupResponse])
 async def get_all_groups():
     """Получить все группы"""
@@ -66,12 +70,13 @@ async def get_all_groups():
     groups_list = await database.fetch_all(query)
     return await enrich_groups_with_members([dict(row._mapping) for row in groups_list])
 
+
 @groups_router.delete("/{group_id}/remove-member/{user_id}", response_model=DetailResponse, responses={
     404: {"description": "Группа или пользователь не найдены"},
 })
 async def remove_user_from_group(
-    group_id: int,
-    user_id: int,
+        group_id: int,
+        user_id: int,
 ):
     """Удаление пользователя из группы (только создатель группы может удалять)"""
 
@@ -91,6 +96,7 @@ async def remove_user_from_group(
     await database.execute(delete_query)
 
     return {"detail": f"Пользователь {user_id} удалён из группы {group_id}"}
+
 
 invites_router = APIRouter(prefix="/invites")
 
@@ -161,6 +167,16 @@ async def create_invite(invite: InviteCreate, current_user=Depends(get_current_u
     invite_id = await database.execute(query)
     created_invite = await database.fetch_one(select(Invitations).where(Invitations.c.id == invite_id))
     return InviteResponse(**created_invite._mapping)
+
+
+@invites_router.get("/", response_model=list[InviteResponse])
+async def list_incoming_invites(current_user=Depends(get_current_user)):
+    """
+    Получить все входящие инвайты для текущего пользователя
+    """
+    query = select(Invitations).where(Invitations.c.recipient_id == current_user.id)
+    invites = await database.fetch_all(query)
+    return [InviteResponse(**invite._mapping) for invite in invites]
 
 
 @invites_router.post("/{invite_id}/accept", response_model=InviteResponse)
