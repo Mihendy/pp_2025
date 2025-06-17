@@ -1,95 +1,167 @@
-.dashboard-container {
-  background-color: #8e2de2; /* Ярко-фиолетовый фон */
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  .dashboard-container {
+    background-color: #8e2de2; /* Ярко-фиолетовый фон */
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-.dashboard-footer {
+  .dashboard-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 52px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 999;
+  }
+
+  .dashboard-icon {
+    margin: 0 10px; /* Расстояние между иконками */
+    padding: 10px;
+    font-size: 24px; /* Размер как у иконки чата */
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .dashboard-icon:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .settings {
+    color: #b36af7;
+  }
+
+  .news {
+    color: #f0f0f0;
+  }
+
+  .apps {
+    color: #fff;
+  }
+
+  .chat-icon {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 50%;    /* именно круг */
+    padding: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+  }
+  .chat-icon:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+  }
+
+
+  .chat-tab {
+    position: fixed;
+    top: 50%;
+    /* right задаём через style */
+    transform: translateY(-50%);
+    background: #8e2de2;
+    color: #fff;
+    border-radius: 6px 0 0 6px;
+    padding: 12px 24px 12px 28px;
+    font-size: 24px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    z-index: 1002;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+    min-width: 48px;
+    transition:
+      background 0.3s,
+      box-shadow 0.3s,
+      padding-left 0.2s;
+  }
+  .chat-tab:hover {
+    background: #b36af7;
+    padding-left: 38px;
+    box-shadow: -6px 0 18px rgba(0,0,0,0.18);
+  }
+.groups-tab {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  height: 52px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 10px 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  z-index: 999;
-}
-
-.dashboard-icon {
-  margin: 0 10px; /* Расстояние между иконками */
-  padding: 10px;
-  font-size: 24px; /* Размер как у иконки чата */
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-icon:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.settings {
-  color: #b36af7;
-}
-
-.news {
-  color: #f0f0f0;
-}
-
-.apps {
-  color: #fff;
-}
-
-.chat-icon {
-  position: fixed;
-  right: 20px;
   top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  border-radius: 50%;    /* именно круг */
-  padding: 10px;
-  font-size: 24px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  z-index: 1000;
-}
-.chat-icon:hover {
-  background-color: rgba(255, 255, 255, 0.4);
-}
-
-
-.chat-tab {
-  position: fixed;
-  top: 50%;
-  /* right задаём через style */
+  /* left задаётся через style */
   transform: translateY(-50%);
   background: #8e2de2;
   color: #fff;
-  border-radius: 6px 0 0 6px;
-  padding: 12px 24px 12px 28px;
+  border-radius: 0 6px 6px 0;
+  padding: 12px 28px 12px 24px;
   font-size: 24px;
   font-weight: bold;
   border: none;
   cursor: pointer;
-  z-index: 1002;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+  z-index: 1001;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.15);
   min-width: 48px;
   transition:
     background 0.3s,
     box-shadow 0.3s,
     padding-left 0.2s;
 }
-.chat-tab:hover {
+
+.groups-tab:hover {
   background: #b36af7;
   padding-left: 38px;
-  box-shadow: -6px 0 18px rgba(0,0,0,0.18);
+  box-shadow: 6px 0 18px rgba(0,0,0,0.18);
+}
+.group-details {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
+.group-details-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.back-button {
+  font-size: 18px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.group-info {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+.create-invite-button {
+  background-color: #8e2de2;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.create-invite-button:hover {
+  background-color: #b36af7;
+}
+
+.group-footer-above {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  justify-content: center;
+}
