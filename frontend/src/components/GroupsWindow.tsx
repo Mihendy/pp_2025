@@ -3,6 +3,7 @@ import '@/css/GroupsWindow.css';
 
 // Хуки
 import { useCreatedGroups } from '@/hooks/useCreatedGroups';
+import { useAllGroups } from '@/hooks/useAllGroups';
 import { useCreateGroup } from '@/hooks/useCreateGroup';
 
 type ResizeDimension = 'width' | 'height' | 'both';
@@ -26,8 +27,9 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
   const [groupName, setGroupName] = useState('');
   const [newGroupLoading, setNewGroupLoading] = useState(false);
 
-  // Получаем список групп, созданных пользователем
-  const { groups: createdGroups, loading, error: apiError, refreshGroups } = useCreatedGroups();
+  // Получаем данные из хуков
+  const { groups: createdGroups, loading: createdLoading, error: createdError, refreshGroups: refreshCreated } = useCreatedGroups();
+  const { groups: allGroups, loading: allLoading, error: allError, refreshGroups: refreshAll } = useAllGroups();
   const { onCreateGroup, loading: creating, error: createError } = useCreateGroup();
 
   // Ресайз окна
@@ -80,7 +82,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose, isOpen]);
 
-  // Форма создания группы
+  // Форма создания новой группы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim()) return alert('Введите название группы');
@@ -90,7 +92,8 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       await onCreateGroup({ name: groupName });
       setGroupName('');
       setIsFormVisible(false);
-      refreshGroups(); // Обновляем список после создания
+      refreshCreated(); // Обновляем список созданных
+      refreshAll();     // и все группы
     } catch (err) {
       console.error('Ошибка при создании группы:', err);
     } finally {
@@ -125,7 +128,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
 
       {/* Контент */}
       <div className="chat-content-scrollable">
-        {/* Форма создания новой группы */}
+        {/* Форма создания группы */}
         <div className="chat-new-chat" style={{ marginTop: '20px' }}>
           {!isFormVisible ? (
             <button
@@ -161,9 +164,8 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
                 Отмена
               </button>
 
-              {/* Сообщения об ошибках */}
-              {(apiError || createError) && (
-                <p className="error-message">{apiError || createError}</p>
+              {(createdError || allError || createError) && (
+                <p className="error-message">{createdError || allError || createError}</p>
               )}
             </form>
           )}
@@ -178,16 +180,32 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
           />
         </div>
 
-        {/* Список групп, которые создал пользователь */}
+        {/* Список созданных мной групп */}
         <div className="chat-categories">
           <strong className="category-title">Созданные мной</strong>
-          {loading && <p className="empty-category">Загрузка групп...</p>}
-          {!loading && createdGroups.length === 0 && (
+          {createdLoading && <p className="empty-category">Загрузка...</p>}
+          {!createdLoading && createdGroups.length === 0 && (
             <p className="empty-category">Вы не создали ни одной группы</p>
           )}
 
-          {!loading &&
+          {!createdLoading &&
             createdGroups.map((group) => (
+              <div key={group.id} className="chat-item">
+                <strong>{group.name}</strong>
+              </div>
+            ))}
+        </div>
+
+        {/* Список всех доступных групп */}
+        <div className="chat-categories" style={{ marginTop: '30px' }}>
+          <strong className="category-title">Все группы</strong>
+          {allLoading && <p className="empty-category">Загрузка всех групп...</p>}
+          {!allLoading && allGroups.length === 0 && (
+            <p className="empty-category">Групп нет</p>
+          )}
+
+          {!allLoading &&
+            allGroups.map((group) => (
               <div key={group.id} className="chat-item">
                 <strong>{group.name}</strong>
               </div>
