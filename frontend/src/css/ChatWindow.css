@@ -1,4 +1,3 @@
-/* Окно чата */
 .chat-window {
   position: fixed;
   top: 0;
@@ -9,19 +8,18 @@
   font-size: 14px;
   border-left: 1px solid rgba(255,255,255,0.2);
   z-index: 1000;
-  width: var(--chat-width, 350px);
   transform: translateX(100%);
   opacity: 0;
   pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
+
 .chat-window.open {
   transform: translateX(0%);
   opacity: 1;
   pointer-events: auto;
 }
 
-
-/* Остальной твой стиль остается без изменений */
 .chat-window-header {
   display: flex;
   justify-content: flex-end;
@@ -58,6 +56,7 @@
   transition: background-color 0.2s ease;
   font-size: 14px;
 }
+
 .new-chat-button:hover {
   background-color: #b36af7;
 }
@@ -95,6 +94,7 @@
   color: white;
   transition: background-color 0.2s ease;
 }
+
 .new-chat-submit:hover {
   background-color: #b36af7;
 }
@@ -105,21 +105,13 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   margin-top: 5px;
 }
+
 .cancel-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .chat-search {
-  margin: 8px 16px 8px 16px;
-}
-.search-input {
-  width: 100%;
-  padding: 8px;
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  border-radius: 4px;
-  font-size: 13px;
+  margin: 8px 16px;
 }
 
 .chat-categories {
@@ -127,6 +119,7 @@
   margin-top: 8px;
   margin-bottom: 8px;
 }
+
 .category-title {
   display: block;
   margin-top: 15px;
@@ -134,6 +127,7 @@
   font-size: 12px;
   color: #aaa;
 }
+
 .empty-category {
   font-size: 12px;
   color: #888;
@@ -149,19 +143,14 @@
   font-size: 13px;
   transition: background-color 0.2s ease;
 }
+
 .chat-item strong {
   display: block;
   margin-bottom: 4px;
 }
+
 .chat-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
-}
-
-.error-message {
-  font-size: 12px;
-  color: red;
-  text-align: center;
-  margin-top: 5px;
 }
 
 .resize-handle {
@@ -169,6 +158,7 @@
   background-color: rgba(255, 255, 255, 0.2);
   z-index: 1001;
 }
+
 .resize-handle-left {
   left: 0;
   top: 0;
@@ -176,6 +166,7 @@
   width: 10px;
   cursor: ew-resize;
 }
+
 .resize-handle-bottom {
   bottom: 0;
   left: 0;
@@ -183,6 +174,7 @@
   height: 10px;
   cursor: ns-resize;
 }
+
 .resize-handle-corner {
   left: 0;
   bottom: 0;

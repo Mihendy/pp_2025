@@ -1,36 +1,39 @@
-// src/components/ChatWindow.tsx
+// src/components/GroupsWindow.tsx
 
 import React, { useRef, useState, useEffect } from 'react';
-import '@/css/ChatWindow.css';
-import { useCreateChat } from '@/hooks/useCreateChat';
-import { useChats } from '@/hooks/useChats';
-import { useAddUserToChat } from '@/hooks/useAddUserToChat';
-import { createChat } from '@/api/chatApi';
+import '@/css/GroupsWindow.css';
+import { useGroups } from '@/hooks/useGroups';
+import { useCreateGroup } from '@/hooks/useCreateGroup';
 
 type ResizeDimension = 'width' | 'height' | 'both';
 
-interface Chat {
+interface Group {
   id: number;
   name: string;
   description?: string;
 }
 
-interface ChatWindowProps {
+interface GroupsWindowProps {
   onClose: () => void;
-  chatWidth: number;
-  setChatWidth: (width: number) => void;
+  groupWidth: number;
+  setGroupWidth: (width: number) => void;
   isOpen: boolean;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, chatWidth, setChatWidth, isOpen }) => {
+const GroupsWindow: React.FC<GroupsWindowProps> = ({
+  onClose,
+  groupWidth,
+  setGroupWidth,
+  isOpen,
+}) => {
   const windowRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(window.innerHeight);
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [email, setEmail] = useState('');
-  const [newChatLoading, setNewChatLoading] = useState(false);
+  const [groupName, setGroupName] = useState('');
+  const [newGroupLoading, setNewGroupLoading] = useState(false);
 
-  const { chats, loading: chatLoading, error: chatError, refreshChats } = useChats();
-  const { addUser: handleAddUser, loading: adding, error: addError } = useAddUserToChat();
+  const { groups, loading, error, refreshGroups } = useGroups();
+  const { createGroup, loading: creating, error: createError } = useCreateGroup();
 
   // Ресайз окна
   const handleResizeStart = (e: React.MouseEvent, dimension: ResizeDimension) => {
@@ -41,13 +44,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, chatWidth, setChatWidt
     const startY = e.clientY;
 
     const doDrag = (moveEvent: MouseEvent) => {
-      let newWidth = chatWidth;
+      let newWidth = groupWidth;
       let newHeight = height;
 
       if (dimension === 'width' || dimension === 'both') {
-        newWidth = chatWidth + (startX - moveEvent.clientX); // ← расширение влево
+        newWidth = groupWidth + (moveEvent.clientX - startX); // ✅ Расширение вправо
         if (newWidth < 250) newWidth = 250;
-        setChatWidth(newWidth);
+        setGroupWidth(newWidth);
       }
 
       if (dimension === 'height' || dimension === 'both') {
@@ -69,8 +72,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, chatWidth, setChatWidt
   // Клик вне окна → закрытие
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      const chatWindow = document.querySelector('.chat-window');
-      if (isOpen && chatWindow && !chatWindow.contains(e.target as Node)) {
+      const groupWindow = document.querySelector('.groups-window');
+      if (isOpen && groupWindow && !groupWindow.contains(e.target as Node)) {
         onClose();
       }
     };
@@ -79,38 +82,38 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, chatWidth, setChatWidt
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose, isOpen]);
 
-  // Форма создания чата
-  const handleCreateChat = async (e: React.FormEvent) => {
+  // Создание группы
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return alert('Введите email собеседника');
+    if (!groupName.trim()) return alert('Введите название группы');
 
-    setNewChatLoading(true);
+    setNewGroupLoading(true);
     try {
-      await createChat({ name: email });
-      setEmail('');
+      await createGroup({ name: groupName });
+      setGroupName('');
       setIsFormVisible(false);
-      refreshChats();
+      refreshGroups();
     } catch (err) {
-      console.error('Ошибка создания чата:', err);
+      console.error('Ошибка создания группы:', err);
     } finally {
-      setNewChatLoading(false);
+      setNewGroupLoading(false);
     }
   };
 
   return (
     <div
       ref={windowRef}
-      className={`chat-window${isOpen ? ' open' : ''}`}
+      className={`groups-window${isOpen ? ' open' : ''}`}
       style={{
-        right: 0,
-        width: `${chatWidth}px`,
-        '--chat-width': `${chatWidth}px`,
+        left: 0,
+        width: `${groupWidth}px`,
+        '--group-width': `${groupWidth}px`,
         height: `${height}px`,
       } as React.CSSProperties}
     >
       {/* Хэндлеры изменения размера */}
       <div
-        className="resize-handle resize-handle-left"
+        className="resize-handle resize-handle-right"
         onMouseDown={(e) => handleResizeStart(e, 'width')}
       />
       <div
@@ -124,42 +127,44 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, chatWidth, setChatWidt
 
       {/* Контент */}
       <div className="chat-content-scrollable">
-        {/* Форма создания нового чата */}
+        {/* Форма создания новой группы */}
         <div className="chat-new-chat" style={{ marginTop: '20px' }}>
           {!isFormVisible ? (
             <button
               className="new-chat-button"
               onClick={() => setIsFormVisible(true)}
-              disabled={newChatLoading}
+              disabled={newGroupLoading}
             >
-              + Новый чат
+              + Новая группа
             </button>
           ) : (
-            <form onSubmit={handleCreateChat} className="new-chat-form">
+            <form onSubmit={handleSubmit} className="new-chat-form">
               <input
-                type="email"
-                placeholder="Введите email собеседника"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Название группы"
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
                 className="new-chat-input"
-                disabled={newChatLoading}
+                disabled={newGroupLoading}
               />
               <button
                 type="submit"
                 className="new-chat-submit"
-                disabled={newChatLoading}
+                disabled={newGroupLoading}
               >
-                {newChatLoading ? 'Создание...' : 'Создать чат'}
+                {newGroupLoading ? 'Создание...' : 'Создать группу'}
               </button>
               <button
                 type="button"
                 className="cancel-button"
                 onClick={() => setIsFormVisible(false)}
-                disabled={newChatLoading}
+                disabled={newGroupLoading}
               >
                 Отмена
               </button>
-              {addError && <p className="error-message">{addError}</p>}
+              {(error || createError) && (
+                <p className="error-message">{error || createError}</p>
+              )}
             </form>
           )}
         </div>
@@ -169,23 +174,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, chatWidth, setChatWidt
           <input type="text" placeholder="Поиск" className="search-input" />
         </div>
 
-        {/* Список чатов */}
+        {/* Список групп */}
         <div className="chat-categories">
           <strong className="category-title">Сегодня</strong>
-          {chatLoading && <p className="empty-category">Загрузка чатов...</p>}
-          {!chatLoading && chats.length === 0 && (
-            <p className="empty-category">Нет чатов</p>
+          {loading && <p className="empty-category">Загрузка групп...</p>}
+          {!loading && groups.length === 0 && (
+            <p className="empty-category">Нет групп</p>
           )}
 
-          {!chatLoading &&
-            chats.map((chat: Chat) => (
-              <div
-                key={chat.id}
-                className="chat-item"
-                onClick={() => handleAddUser(chat.id)}
-              >
-                <strong>{chat.name}</strong>
-                {chat.description && <p>{chat.description}</p>}
+          {!loading &&
+            groups.map((group) => (
+              <div key={group.id} className="chat-item">
+                <strong>{group.name}</strong>
+                {group.description && <p>{group.description}</p>}
               </div>
             ))}
         </div>
@@ -194,4 +195,4 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, chatWidth, setChatWidt
   );
 };
 
-export default ChatWindow;
+export default GroupsWindow;
