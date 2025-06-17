@@ -107,7 +107,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       await onCreateGroup({ name: groupName });
       setGroupName('');
       setIsFormVisible(false);
-      refreshCreatedGroups(); // Обновляем список созданных групп
+      refreshCreatedGroups(); // обновляем список после создания
     } catch (err) {
       console.error('Ошибка создания группы:', err);
     } finally {
@@ -128,7 +128,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     try {
       await createInvite({
         group_id: selectedGroup.id,
-        sender_id: userId,
+        sender_id: userId, // ← добавили sender_id
         recipient_id: recipient,
       });
       alert('Приглашение отправлено');
@@ -158,7 +158,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
         onMouseDown={(e) => handleResizeStart(e, 'height')}
       />
       <div
-        className="resize-handle resize-handle-corner"
+        className="resize-handle resize-handle-corner-right-bottom"
         onMouseDown={(e) => handleResizeStart(e, 'both')}
       />
 
@@ -206,6 +206,18 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               )}
             </div>
 
+            {/* Кнопка "Мои приглашения" */}
+            <div className="chat-new-chat">
+              <button
+                className="new-chat-button"
+                onClick={() =>
+                  setSelectedGroup({ id: -1, name: 'Мои приглашения', creator_id: userId })
+                }
+              >
+                📬 Мои приглашения
+              </button>
+            </div>
+
             {/* Поиск */}
             <div className="chat-search">
               <input
@@ -233,8 +245,8 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               )}
             </div>
           </>
-        ) : (
-          // Внутреннее окно группы
+        ) : selectedGroup.id === -1 ? (
+          // Внутреннее окно "Мои приглашения"
           <div className="group-details">
             <header className="group-details-header">
               <button className="back-button" onClick={() => setSelectedGroup(null)}>
@@ -243,9 +255,26 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               <span>{selectedGroup.name}</span>
             </header>
 
+            <div className="invites-list">
+              <h4>Входящие приглашения:</h4>
+              <ul>
+                <li>Пока нет входящих приглашений</li>
+              </ul>
+            </div>
+          </div>
+        ) : (
+          // Внутреннее окно группы
+          <div className="group-details">
+            <header className="group-details-header">
+              <button className="back-button" onClick={() => setSelectedGroup(null)}>
+                ←
+              </button>
+              <span>{selectedGroup?.name}</span>
+            </header>
+
             {/* Информация о создателе */}
             <div className="group-info">
-              <small>Создатель: ID {selectedGroup.creator_id}</small>
+              <small>Создатель: ID {selectedGroup?.creator_id}</small>
             </div>
 
             {/* Список участников */}
@@ -268,9 +297,9 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
           </div>
         )}
 
-        {/* Форма приглашения (показывается поверх контента) */}
+        {/* Форма отправки приглашения */}
         {showInviteForm && (
-          <div className="invite-form-overlay">
+          <div className="invite-form-overlay" style={{ maxWidth: `${groupWidth}px` }}>
             <form onSubmit={handleSubmitInvite} className="invite-form">
               <h4>Введите ID пользователя</h4>
               <input

@@ -376,3 +376,57 @@
     background: rgba(142, 45, 226, 0.10);
     border-radius: 4px;
 }
+
+.invites-list {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.invite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.invite-item:last-child {
+  border-bottom: none;
+}
+
+.invite-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.accept-button,
+.decline-button {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.accept-button {
+  background-color: #8e2de2;
+  color: white;
+  border: none;
+}
+
+.accept-button:hover {
+  background-color: #b36af7;
+}
+
+.decline-button {
+  background-color: transparent;
+  color: red;
+  border: 1px solid red;
+}
+
+.decline-button:hover {
+  background-color: rgba(255, 0, 0, 0.1);
+}

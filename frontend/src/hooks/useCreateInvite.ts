@@ -12,7 +12,7 @@ export const useCreateInvite = (): UseCreateInviteResult => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createInvite = async (data: InviteRequest): Promise<InviteResponse> => {
+  const onCreateInvite = async (data: InviteRequest): Promise<InviteResponse> => {
     setLoading(true);
     setError(null);
 
@@ -28,7 +28,7 @@ export const useCreateInvite = (): UseCreateInviteResult => {
   };
 
   return {
-    createInvite,
+    createInvite: onCreateInvite,
     loading,
     error,
   };
