@@ -47,3 +47,94 @@
   background-color: #8e2de2;
   border-radius: 50%;
 }
+.group-details {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.group-details-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-button {
+  font-size: 18px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.creator-info {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+.members-list {
+  flex: 1;
+  margin-top: 16px;
+  overflow-y: auto;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.delete-button {
+  margin-left: auto;
+  margin-left: 10px;
+  background-color: transparent;
+  color: red;
+  border: 1px solid red;
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
+.create-app-button {
+  margin-top: auto;
+  background-color: #8e2de2;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.create-app-button:hover {
+  background-color: #b36af7;
+}
+
+.leave-group-button {
+  margin-top: 10px;
+  background-color: transparent;
+  color: #aaa;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.leave-group-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

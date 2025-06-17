@@ -1,12 +1,19 @@
+// src/components/GroupsWindow.tsx
+
 import React, { useRef, useState, useEffect } from 'react';
 import '@/css/GroupsWindow.css';
 
 // Хуки
-import { useCreatedGroups } from '@/hooks/useCreatedGroups';
-import { useAllGroups } from '@/hooks/useAllGroups';
 import { useCreateGroup } from '@/hooks/useCreateGroup';
+import { useCreatedGroups } from '@/hooks/useCreatedGroups';
 
 type ResizeDimension = 'width' | 'height' | 'both';
+
+interface Group {
+  id: number;
+  name: string;
+  creator_id: number;
+}
 
 interface GroupsWindowProps {
   onClose: () => void;
@@ -23,14 +30,18 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
 }) => {
   const windowRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(window.innerHeight);
-  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [groupName, setGroupName] = useState('');
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const [newGroupLoading, setNewGroupLoading] = useState(false);
 
-  // Получаем данные из хуков
-  const { groups: createdGroups, loading: createdLoading, error: createdError, refreshGroups: refreshCreated } = useCreatedGroups();
-  const { groups: allGroups, loading: allLoading, error: allError, refreshGroups: refreshAll } = useAllGroups();
+  // Получаем группы, созданные пользователем
+  const { groups: createdGroups, refreshGroups: refreshCreatedGroups } = useCreatedGroups();
   const { onCreateGroup, loading: creating, error: createError } = useCreateGroup();
+
+  // Проверяем, является ли пользователь создателем
+  const userStringId = localStorage.getItem('user_id');
+  const userId = userStringId ? parseInt(userStringId, 10) : -1;
 
   // Ресайз окна
   const handleResizeStart = (
@@ -48,7 +59,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       let newHeight = height;
 
       if (dimension === 'width' || dimension === 'both') {
-        newWidth = groupWidth + (startX - moveEvent.clientX); // ← расширение вправо
+        newWidth = groupWidth + (startX - moveEvent.clientX);
         if (newWidth < 250) newWidth = 250;
         setGroupWidth(newWidth);
       }
@@ -69,7 +80,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     document.addEventListener('mouseup', stopDrag);
   };
 
-  // Клик вне окна → закрытие
+  // Выход по клику вне окна
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const groupWindow = document.querySelector('.groups-window');
@@ -82,7 +93,12 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose, isOpen]);
 
-  // Форма создания новой группы
+  // Вернуться к списку групп
+  const goBack = () => {
+    setSelectedGroup(null);
+  };
+
+  // Создание новой группы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim()) return alert('Введите название группы');
@@ -92,8 +108,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       await onCreateGroup({ name: groupName });
       setGroupName('');
       setIsFormVisible(false);
-      refreshCreated(); // Обновляем список созданных
-      refreshAll();     // и все группы
+      refreshCreatedGroups(); // Обновляем список после создания
     } catch (err) {
       console.error('Ошибка при создании группы:', err);
     } finally {
@@ -108,9 +123,8 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       style={{
         left: 0,
         width: `${groupWidth}px`,
-        '--group-width': `${groupWidth}px`,
         height: `${height}px`,
-      } as React.CSSProperties}
+      }}
     >
       {/* Хэндлеры изменения размера */}
       <div
@@ -128,89 +142,123 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
 
       {/* Контент */}
       <div className="chat-content-scrollable">
-        {/* Форма создания группы */}
-        <div className="chat-new-chat" style={{ marginTop: '20px' }}>
-          {!isFormVisible ? (
-            <button
-              className="new-chat-button"
-              onClick={() => setIsFormVisible(true)}
-              disabled={newGroupLoading}
-            >
-              + Новая группа
-            </button>
-          ) : (
-            <form onSubmit={handleSubmit} className="new-chat-form">
+        {!selectedGroup ? (
+          <>
+            {/* Форма создания группы */}
+            <div className="chat-new-chat" style={{ marginTop: '20px' }}>
+              {!isFormVisible ? (
+                <button
+                  className="new-chat-button"
+                  onClick={() => setIsFormVisible(true)}
+                  disabled={newGroupLoading}
+                >
+                  + Новая группа
+                </button>
+              ) : (
+                <form onSubmit={handleSubmit} className="new-chat-form">
+                  <input
+                    type="text"
+                    placeholder="Название группы"
+                    value={groupName}
+                    onChange={(e) => setGroupName(e.target.value)}
+                    className="new-chat-input"
+                    disabled={newGroupLoading}
+                  />
+                  <button
+                    type="submit"
+                    className="new-chat-submit"
+                    disabled={newGroupLoading}
+                  >
+                    {newGroupLoading ? 'Создание...' : 'Создать группу'}
+                  </button>
+                  <button
+                    type="button"
+                    className="cancel-button"
+                    onClick={() => setIsFormVisible(false)}
+                    disabled={newGroupLoading}
+                  >
+                    Отмена
+                  </button>
+                  {createError && <p className="error-message">{createError}</p>}
+                </form>
+              )}
+            </div>
+
+            {/* Поиск */}
+            <div className="chat-search">
               <input
                 type="text"
-                placeholder="Название группы"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-                className="new-chat-input"
-                disabled={newGroupLoading}
+                placeholder="Поиск"
+                className="search-input"
               />
-              <button
-                type="submit"
-                className="new-chat-submit"
-                disabled={newGroupLoading}
-              >
-                {newGroupLoading ? 'Создание...' : 'Создать группу'}
-              </button>
-              <button
-                type="button"
-                className="cancel-button"
-                onClick={() => setIsFormVisible(false)}
-                disabled={newGroupLoading}
-              >
-                Отмена
-              </button>
+            </div>
 
-              {(createdError || allError || createError) && (
-                <p className="error-message">{createdError || allError || createError}</p>
+            {/* Список групп, где пользователь — создатель */}
+            <div className="chat-categories">
+              <strong className="category-title">Созданные мной</strong>
+              {createdGroups.length === 0 ? (
+                <p className="empty-category">Вы не создали ни одной группы</p>
+              ) : (
+                createdGroups.map((group) => (
+                  <div
+                    key={group.id}
+                    className="chat-item"
+                    onClick={() => setSelectedGroup(group)}
+                  >
+                    <strong>{group.name}</strong>
+                  </div>
+                ))
               )}
-            </form>
-          )}
-        </div>
+            </div>
+          </>
+        ) : (
+          // Внутреннее окно группы
+          <div className="group-details">
+            <header className="group-details-header">
+              <button className="back-button" onClick={goBack}>
+                ←
+              </button>
+              <span>{selectedGroup.name}</span>
+            </header>
 
-        {/* Поиск */}
-        <div className="chat-search">
-          <input
-            type="text"
-            placeholder="Поиск"
-            className="search-input"
-          />
-        </div>
+            {/* Информация о создателе */}
+            <div className="group-info">
+              <small>Создатель: ID {selectedGroup.creator_id}</small>
+            </div>
 
-        {/* Список созданных мной групп */}
-        <div className="chat-categories">
-          <strong className="category-title">Созданные мной</strong>
-          {createdLoading && <p className="empty-category">Загрузка...</p>}
-          {!createdLoading && createdGroups.length === 0 && (
-            <p className="empty-category">Вы не создали ни одной группы</p>
-          )}
+            {/* Список участников */}
+            <div className="members-list">
+              <h4>Участники:</h4>
+              <ul>
+                <li>Пока нет участников</li>
+              </ul>
+            </div>
 
-          {!createdLoading &&
-            createdGroups.map((group) => (
-              <div key={group.id} className="chat-item">
-                <strong>{group.name}</strong>
-              </div>
-            ))}
-        </div>
+            {/* Действия */}
+            <footer className="group-footer">
+              <button
+                className="create-app-button"
+                onClick={() => alert('Создание приглашения...')}
+              >
+                📝 Создать приглашение
+              </button>
 
-        {/* Список всех доступных групп */}
-        <div className="chat-categories" style={{ marginTop: '30px' }}>
-          <strong className="category-title">Все группы</strong>
-          {allLoading && <p className="empty-category">Загрузка всех групп...</p>}
-          {!allLoading && allGroups.length === 0 && (
-            <p className="empty-category">Групп нет</p>
-          )}
+              {/* Кнопка "Удалить" появляется только если есть участники */}
+              {false && (
+                <button
+                  className="delete-button"
+                  onClick={() => alert('Удалить пользователя')}
+                >
+                  Удалить
+                </button>
+              )}
 
-          {!allLoading &&
-            allGroups.map((group) => (
-              <div key={group.id} className="chat-item">
-                <strong>{group.name}</strong>
-              </div>
-            ))}
-        </div>
+              <button className="leave-group-button" onClick={goBack}>
+                ← Назад
+              </button>
+            </footer>
+          </div>
+        )}
       </div>
     </div>
   );
