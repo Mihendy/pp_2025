@@ -1,4 +1,5 @@
 import { GroupRequest, GroupResponse } from '@/types/group.types';
+import { InviteRequest, InviteResponse } from '@/types/invite.types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -114,3 +115,4 @@ export const removeUserFromGroup = async (
 
   return await response.json();
 };
+

@@ -118,3 +118,50 @@
   padding-left: 38px;
   box-shadow: 6px 0 18px rgba(0,0,0,0.18);
 }
+.group-details {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.group-details-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-button {
+  font-size: 18px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.group-info {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+.create-invite-button {
+  background-color: #8e2de2;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.create-invite-button:hover {
+  background-color: #b36af7;
+}
+
+.group-footer-above {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  justify-content: center;
+}

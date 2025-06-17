@@ -1,19 +1,15 @@
-// src/components/GroupsWindow.tsx
-
 import React, { useRef, useState, useEffect } from 'react';
 import '@/css/GroupsWindow.css';
 
 // Хуки
 import { useCreateGroup } from '@/hooks/useCreateGroup';
 import { useCreatedGroups } from '@/hooks/useCreatedGroups';
+import { useCreateInvite } from '@/hooks/useCreateInvite';
+
+// Типы
+import { Group } from '@/types/group.types';
 
 type ResizeDimension = 'width' | 'height' | 'both';
-
-interface Group {
-  id: number;
-  name: string;
-  creator_id: number;
-}
 
 interface GroupsWindowProps {
   onClose: () => void;
@@ -33,13 +29,16 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [groupName, setGroupName] = useState('');
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [recipientId, setRecipientId] = useState<string>('');
   const [newGroupLoading, setNewGroupLoading] = useState(false);
 
-  // Получаем группы, созданные пользователем
+  // Получаем список своих групп
   const { groups: createdGroups, refreshGroups: refreshCreatedGroups } = useCreatedGroups();
   const { onCreateGroup, loading: creating, error: createError } = useCreateGroup();
+  const { createInvite, loading: inviting, error: inviteError } = useCreateInvite();
 
-  // Проверяем, является ли пользователь создателем
+  // Проверяем ID текущего пользователя
   const userStringId = localStorage.getItem('user_id');
   const userId = userStringId ? parseInt(userStringId, 10) : -1;
 
@@ -93,13 +92,13 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose, isOpen]);
 
-  // Вернуться к списку групп
-  const goBack = () => {
-    setSelectedGroup(null);
+  // Открытие внутреннего окна группы
+  const openGroupDetails = (group: Group) => {
+    setSelectedGroup(group);
   };
 
   // Создание новой группы
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim()) return alert('Введите название группы');
 
@@ -108,11 +107,34 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       await onCreateGroup({ name: groupName });
       setGroupName('');
       setIsFormVisible(false);
-      refreshCreatedGroups(); // Обновляем список после создания
+      refreshCreatedGroups(); // Обновляем список созданных групп
     } catch (err) {
-      console.error('Ошибка при создании группы:', err);
+      console.error('Ошибка создания группы:', err);
     } finally {
       setNewGroupLoading(false);
+    }
+  };
+
+  // Отправка приглашения
+  const handleSubmitInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recipientId.trim()) return alert('Введите ID получателя');
+
+    const recipient = parseInt(recipientId, 10);
+    if (isNaN(recipient)) return alert('ID должен быть числом');
+
+    if (!selectedGroup) return alert('Выберите группу');
+
+    try {
+      await createInvite({
+        group_id: selectedGroup.id,
+        sender_id: userId,
+        recipient_id: recipient,
+      });
+      alert('Приглашение отправлено');
+      setRecipientId('');
+    } catch (err: any) {
+      alert(`Ошибка: ${err.message}`);
     }
   };
 
@@ -155,7 +177,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
                   + Новая группа
                 </button>
               ) : (
-                <form onSubmit={handleSubmit} className="new-chat-form">
+                <form onSubmit={handleSubmitGroup} className="new-chat-form">
                   <input
                     type="text"
                     placeholder="Название группы"
@@ -193,7 +215,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               />
             </div>
 
-            {/* Список групп, где пользователь — создатель */}
+            {/* Список групп, созданных пользователем */}
             <div className="chat-categories">
               <strong className="category-title">Созданные мной</strong>
               {createdGroups.length === 0 ? (
@@ -203,7 +225,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
                   <div
                     key={group.id}
                     className="chat-item"
-                    onClick={() => setSelectedGroup(group)}
+                    onClick={() => openGroupDetails(group)}
                   >
                     <strong>{group.name}</strong>
                   </div>
@@ -215,7 +237,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
           // Внутреннее окно группы
           <div className="group-details">
             <header className="group-details-header">
-              <button className="back-button" onClick={goBack}>
+              <button className="back-button" onClick={() => setSelectedGroup(null)}>
                 ←
               </button>
               <span>{selectedGroup.name}</span>
@@ -234,29 +256,48 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               </ul>
             </div>
 
-            {/* Действия */}
-            <footer className="group-footer">
+            {/* Кнопка создания приглашения */}
+            <div className="group-footer-above">
               <button
-                className="create-app-button"
-                onClick={() => alert('Создание приглашения...')}
+                className="create-invite-button"
+                onClick={() => setShowInviteForm(true)}
               >
                 📝 Создать приглашение
               </button>
+            </div>
+          </div>
+        )}
 
-              {/* Кнопка "Удалить" появляется только если есть участники */}
-              {false && (
-                <button
-                  className="delete-button"
-                  onClick={() => alert('Удалить пользователя')}
-                >
-                  Удалить
-                </button>
-              )}
-
-              <button className="leave-group-button" onClick={goBack}>
-                ← Назад
+        {/* Форма приглашения (показывается поверх контента) */}
+        {showInviteForm && (
+          <div className="invite-form-overlay">
+            <form onSubmit={handleSubmitInvite} className="invite-form">
+              <h4>Введите ID пользователя</h4>
+              <input
+                type="text"
+                placeholder="ID получателя"
+                value={recipientId}
+                onChange={(e) => setRecipientId(e.target.value)}
+                className="new-chat-input"
+                disabled={inviting}
+              />
+              <button
+                type="submit"
+                className="new-chat-submit"
+                disabled={inviting}
+              >
+                {inviting ? 'Отправка...' : 'Отправить приглашение'}
               </button>
-            </footer>
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={() => setShowInviteForm(false)}
+                disabled={inviting}
+              >
+                Отмена
+              </button>
+              {inviteError && <p className="error-message">{inviteError}</p>}
+            </form>
           </div>
         )}
       </div>

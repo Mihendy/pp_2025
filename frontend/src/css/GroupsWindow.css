@@ -138,3 +138,78 @@
 .leave-group-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+.send-invite-section {
+  margin-top: 20px;
+  padding: 12px 16px;
+  background-color: rgba(142, 45, 226, 0.1);
+  border-radius: 6px;
+}
+
+.invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invite-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1003;
+  padding: 20px;
+}
+
+.invite-form {
+  width: 90%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #242424;
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+.create-invite-button {
+  margin-top: auto;
+  background-color: #8e2de2;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.create-invite-button:hover {
+  background-color: #b36af7;
+}
+
+.group-footer-above {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+.create-invite-button {
+  background-color: #8e2de2;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.create-invite-button:hover {
+  background-color: #b36af7;
+}
