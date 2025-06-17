@@ -6,6 +6,8 @@ import { useCreateGroup } from '@/hooks/useCreateGroup';
 import { useCreatedGroups } from '@/hooks/useCreatedGroups';
 import { useCreateInvite } from '@/hooks/useCreateInvite';
 import { useGetPendingInvites } from '@/hooks/useGetPendingInvites';
+import { useAcceptInvite } from '@/hooks/useAcceptInvite';
+import { useDeclineInvite } from '@/hooks/useDeclineInvite';
 
 // Типы
 import { Group } from '@/types/group.types';
@@ -35,7 +37,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
   const [recipientId, setRecipientId] = useState<string>('');
   const [newGroupLoading, setNewGroupLoading] = useState(false);
 
-  // Получаем свои группы
+  // Получаем список своих групп
   const { groups: createdGroups, refreshGroups: refreshCreatedGroups } = useCreatedGroups();
   const { onCreateGroup, loading: creating, error: createError } = useCreateGroup();
   const { createInvite, loading: inviting, error: inviteError } = useCreateInvite();
@@ -47,6 +49,8 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     error: inviteListError,
     refreshInvites,
   } = useGetPendingInvites();
+  const { acceptInvite, loading: accepting, error: acceptError } = useAcceptInvite();
+  const { declineInvite, loading: declining, error: declineError } = useDeclineInvite();
 
   // Проверяем ID текущего пользователя
   const userStringId = localStorage.getItem('user_id');
@@ -89,7 +93,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     document.addEventListener('mouseup', stopDrag);
   };
 
-  // Клик вне окна → закрытие
+  // Выход по клику вне окна
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const groupWindow = document.querySelector('.groups-window');
@@ -144,6 +148,28 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       alert('Приглашение отправлено');
       setRecipientId('');
       setShowInviteForm(false);
+    } catch (err: any) {
+      alert(`Ошибка: ${err.message}`);
+    }
+  };
+
+  // Принять приглашение
+  const handleAcceptInvite = async (inviteId: number) => {
+    try {
+      await acceptInvite(inviteId);
+      alert('Вы приняли приглашение');
+      refreshInvites(); // обновляем список
+    } catch (err: any) {
+      alert(`Ошибка: ${err.message}`);
+    }
+  };
+
+  // Отклонить приглашение
+  const handleDeclineInvite = async (inviteId: number) => {
+    try {
+      await declineInvite(inviteId);
+      alert('Приглашение отклонено');
+      refreshInvites(); // обновляем список
     } catch (err: any) {
       alert(`Ошибка: ${err.message}`);
     }
@@ -279,9 +305,10 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
                 <p className="error-message">{inviteListError}</p>
               )}
 
-              {!loadingInvites && pendingInvites.length === 0 && (
-                <p className="empty-category">Нет входящих приглашений</p>
-              )}
+              {!loadingInvites &&
+                pendingInvites.length === 0 && (
+                  <p className="empty-category">Нет входящих приглашений</p>
+                )}
 
               {!loadingInvites &&
                 pendingInvites.map((invite) => (
@@ -289,6 +316,22 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
                     <div>
                       <strong>Группа ID {invite.group_id}</strong>
                       <small>Инициировал пользователь: {invite.sender_id}</small>
+                    </div>
+                    <div className="invite-buttons">
+                      <button
+                        className="accept-button"
+                        onClick={() => handleAcceptInvite(invite.id)}
+                        disabled={accepting || declining}
+                      >
+                        ✅ Принять
+                      </button>
+                      <button
+                        className="decline-button"
+                        onClick={() => handleDeclineInvite(invite.id)}
+                        disabled={accepting || declining}
+                      >
+                        ❌ Отклонить
+                      </button>
                     </div>
                   </div>
                 ))}
