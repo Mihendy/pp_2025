@@ -1,26 +1,30 @@
+// src/hooks/useUserGroups.ts
+
 import { useEffect, useState } from 'react';
-import { getGroups } from '@/api/groupApi';
+import { getUserGroups as apiGetUserGroups } from '@/api/groupApi';
 import { GroupResponse } from '@/types/group.types';
 
-interface UseGroupsResult {
+interface UseUserGroupsResult {
   groups: GroupResponse[];
   loading: boolean;
   error: string | null;
   refreshGroups: () => void;
 }
 
-export const useGroups = (): UseGroupsResult => {
+export const useUserGroups = (): UseUserGroupsResult => {
   const [groups, setGroups] = useState<GroupResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadGroups = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      const data = await getGroups();
+      const data = await apiGetUserGroups();
       setGroups(data);
     } catch (err: any) {
-      setError(err.message || 'Не удалось загрузить группы');
+      setError(err.message || 'Ошибка при загрузке групп');
     } finally {
       setLoading(false);
     }

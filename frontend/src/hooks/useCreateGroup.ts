@@ -1,43 +1,37 @@
-// src/hooks/useCreateGroup.ts
-
 import { useState } from 'react';
-import { GroupRequest, GroupResponse } from '@/types/group.types';
+import { createGroup as apiCreateGroup } from '@/api/groupApi';
 
-const API_URL = 'http://localhost:8000'; // или VITE_API_URL
+// Типы
+interface GroupRequest {
+  name: string;
+}
 
-export const useCreateGroup = () => {
+interface UseCreateGroupResult {
+  loading: boolean;
+  error: string | null;
+  onCreateGroup: (data: GroupRequest) => Promise<void>;
+}
+
+export const useCreateGroup = (): UseCreateGroupResult => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createGroup = async (data: GroupRequest): Promise<GroupResponse> => {
-    const accessToken = localStorage.getItem('access_token');
-
+  const onCreateGroup = async (data: GroupRequest): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/groups/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.detail || 'Не удалось создать группу');
-      }
-
-      return await response.json();
+      await apiCreateGroup(data); // Вызываем API
     } catch (err: any) {
-      setError(err.message || 'Ошибка при создании группы');
-      throw err;
+      setError(err.message || 'Не удалось создать группу');
     } finally {
       setLoading(false);
     }
   };
 
-  return { createGroup, loading, error };
+  return {
+    loading,
+    error,
+    onCreateGroup, // ✅ Теперь это доступно
+  };
 };

@@ -1,17 +1,11 @@
-// src/components/GroupsWindow.tsx
-
 import React, { useRef, useState, useEffect } from 'react';
 import '@/css/GroupsWindow.css';
-import { useGroups } from '@/hooks/useGroups';
+
+// Хуки
+import { useCreatedGroups } from '@/hooks/useCreatedGroups';
 import { useCreateGroup } from '@/hooks/useCreateGroup';
 
 type ResizeDimension = 'width' | 'height' | 'both';
-
-interface Group {
-  id: number;
-  name: string;
-  description?: string;
-}
 
 interface GroupsWindowProps {
   onClose: () => void;
@@ -32,11 +26,15 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
   const [groupName, setGroupName] = useState('');
   const [newGroupLoading, setNewGroupLoading] = useState(false);
 
-  const { groups, loading, error, refreshGroups } = useGroups();
-  const { createGroup, loading: creating, error: createError } = useCreateGroup();
+  // Получаем список групп, созданных пользователем
+  const { groups: createdGroups, loading, error: apiError, refreshGroups } = useCreatedGroups();
+  const { onCreateGroup, loading: creating, error: createError } = useCreateGroup();
 
   // Ресайз окна
-  const handleResizeStart = (e: React.MouseEvent, dimension: ResizeDimension) => {
+  const handleResizeStart = (
+    e: React.MouseEvent,
+    dimension: ResizeDimension
+  ) => {
     e.stopPropagation();
     e.preventDefault();
 
@@ -48,7 +46,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       let newHeight = height;
 
       if (dimension === 'width' || dimension === 'both') {
-        newWidth = groupWidth + (moveEvent.clientX - startX); // ✅ Расширение вправо
+        newWidth = groupWidth + (startX - moveEvent.clientX); // ← расширение вправо
         if (newWidth < 250) newWidth = 250;
         setGroupWidth(newWidth);
       }
@@ -82,19 +80,19 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose, isOpen]);
 
-  // Создание группы
+  // Форма создания группы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim()) return alert('Введите название группы');
 
     setNewGroupLoading(true);
     try {
-      await createGroup({ name: groupName });
+      await onCreateGroup({ name: groupName });
       setGroupName('');
       setIsFormVisible(false);
-      refreshGroups();
+      refreshGroups(); // Обновляем список после создания
     } catch (err) {
-      console.error('Ошибка создания группы:', err);
+      console.error('Ошибка при создании группы:', err);
     } finally {
       setNewGroupLoading(false);
     }
@@ -162,8 +160,10 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               >
                 Отмена
               </button>
-              {(error || createError) && (
-                <p className="error-message">{error || createError}</p>
+
+              {/* Сообщения об ошибках */}
+              {(apiError || createError) && (
+                <p className="error-message">{apiError || createError}</p>
               )}
             </form>
           )}
@@ -171,22 +171,25 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
 
         {/* Поиск */}
         <div className="chat-search">
-          <input type="text" placeholder="Поиск" className="search-input" />
+          <input
+            type="text"
+            placeholder="Поиск"
+            className="search-input"
+          />
         </div>
 
-        {/* Список групп */}
+        {/* Список групп, которые создал пользователь */}
         <div className="chat-categories">
-          <strong className="category-title">Сегодня</strong>
+          <strong className="category-title">Созданные мной</strong>
           {loading && <p className="empty-category">Загрузка групп...</p>}
-          {!loading && groups.length === 0 && (
-            <p className="empty-category">Нет групп</p>
+          {!loading && createdGroups.length === 0 && (
+            <p className="empty-category">Вы не создали ни одной группы</p>
           )}
 
           {!loading &&
-            groups.map((group) => (
+            createdGroups.map((group) => (
               <div key={group.id} className="chat-item">
                 <strong>{group.name}</strong>
-                {group.description && <p>{group.description}</p>}
               </div>
             ))}
         </div>
