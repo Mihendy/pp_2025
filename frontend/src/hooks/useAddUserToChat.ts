@@ -6,12 +6,12 @@ export const useAddUserToChat = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAddUserToChat = async (chatId: number): Promise<void> => {
+  const handleAddUserToChat = async (chatId: number, user_id: number): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await addUserToChat(chatId);
+      const result = await addUserToChat(chatId, user_id);
       console.log('✅ Пользователь добавлен:', result.message);
     } catch (err: any) {
       console.error('❌ Ошибка при добавлении пользователя:', err.message);

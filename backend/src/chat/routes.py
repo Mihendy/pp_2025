@@ -38,7 +38,6 @@ async def get_chats(current_user: User = Depends(get_current_user)):
     return results
 
 
-
 @router.post("/", response_model=ChatResponse)
 async def create_chat(chat: ChatCreate, current_user: User = Depends(get_current_user)):
     """Создать новый чат"""
@@ -50,10 +49,11 @@ async def create_chat(chat: ChatCreate, current_user: User = Depends(get_current
     query = ChatMember.select().where(ChatMember.c.chat_id == chat_id)
     members_result = await database.fetch_all(query)
     members = [m["user_id"] for m in members_result]
-    return ChatResponse(id=chat_id, name=chat.name, description=chat.description, owner_id=current_user_id, members=members)
+    return ChatResponse(id=chat_id, name=chat.name, description=chat.description, owner_id=current_user_id,
+                        members=members)
 
 
-@router.get("/{chat_id}", response_model=ChatResponse,responses={
+@router.get("/{chat_id}", response_model=ChatResponse, responses={
     404: {"description": "Chat not found"},
     403: {"description": "You are not a member of this chat"}})
 async def get_chat_info(chat=Depends(get_chat_if_member)):
@@ -61,20 +61,22 @@ async def get_chat_info(chat=Depends(get_chat_if_member)):
     return chat
 
 
-@router.get("/{chat_id}/messages", response_model=List[ChatMessageResponse],
-            responses={
-                404: {"description": "Chat not found"},
-                403: {"description": "You are not a member of this chat"},
-            })
+@router.get("/{chat_id}/messages", response_model=List[ChatMessageResponse])
 async def get_messages(
-        chat=Depends(get_chat_if_member),  # проверка, является ли пользователь участником чата
+        chat=Depends(get_chat_if_member),
         skip: int = 0,
         limit: int = 50,
 ):
-    """Получить сообщения из чата"""
-    query = select(Message).where(Message.c.chat_id == chat.id).offset(skip).limit(limit)
+    """Получить последние сообщения из чата (от новых к старым)"""
+    query = (
+        select(Message)
+        .where(Message.c.chat_id == chat.id)
+        .order_by(Message.c.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
     messages = await database.fetch_all(query)
-    return messages
+    return messages  # фронт получает [новое, ..., старое]
 
 
 @router.post("/{chat_id}/members",
@@ -151,36 +153,26 @@ async def remove_member(
     return {"message": "User removed from chat"}
 
 
-from fastapi import HTTPException, WebSocket, WebSocketDisconnect
-from sqlalchemy import select
-
-
 @router.websocket("/ws/{chat_id}/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: int):
-    # Проверяем, является ли пользователь участником чата
-    query = select(ChatMember).where(ChatMember.c.chat_id == chat_id, ChatMember.c.user_id == user_id)
-    result = await database.fetch_one(query)
-
-    if not result:
-        raise HTTPException(status_code=403, detail="User is not a member of this chat")
-
     await manager.connect(websocket, chat_id, user_id)
-
     try:
         # Отправляем историю сообщений при подключении
-        query = select(Message).where(Message.c.chat_id == chat_id).order_by(Message.c.timestamp)
+        print("here1")
+        query = select(Message).where(Message.c.chat_id == chat_id).order_by(Message.c.created_at)
         messages = await database.fetch_all(query)
+        print("here2")
         for message in messages:
-            await websocket.send_text(f"{message['user_id']}: {message['text']}")
+            await websocket.send_text(f"{message['sender_id']}: {message['text']}")
 
         while True:
             message = await websocket.receive_text()
 
             # Сохраняем сообщение в базе данных
-            query = Message.insert().values(chat_id=chat_id, user_id=user_id, text=message)
+            query = Message.insert().values(chat_id=chat_id, sender_id=user_id, text=message)
             await database.execute(query)
 
-            await manager.broadcast(message, chat_id)
+            await manager.broadcast(f"{user_id}: {message}", chat_id)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, chat_id)

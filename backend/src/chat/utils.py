@@ -32,4 +32,11 @@ async def get_chat_if_member(
             detail="Chat not found"
         )
 
-    return ChatResponse(**chat)
+    query = select(ChatMember.c.user_id).where(ChatMember.c.chat_id == chat_id)
+    members = await database.fetch_all(query)
+    member_ids = [m['user_id'] for m in members]
+
+    chat_dict = dict(chat)
+    chat_dict['members'] = member_ids
+
+    return ChatResponse(**chat_dict)

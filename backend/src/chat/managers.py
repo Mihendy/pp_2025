@@ -13,7 +13,7 @@ class WSChatConnectionManager:
 
     async def connect(self, websocket: WebSocket, chat_id: int, user_id: int):
         """Подключение пользователя к чату"""
-        query = select([ChatMember]).where(ChatMember.c.chat_id == chat_id, ChatMember.c.user_id == user_id)
+        query = select(ChatMember).where(ChatMember.c.chat_id == chat_id, ChatMember.c.user_id == user_id)
         result = await database.fetch_one(query)
         if not result:
             raise HTTPException(status_code=403, detail="User is not a member of the chat")

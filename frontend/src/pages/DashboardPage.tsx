@@ -6,7 +6,7 @@ import ChatWindow from '../components/ChatWindow';
 const DashboardPage: React.FC = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
 
-    const getDefaultChatWidth = () => Math.max(window.innerWidth * 0.3, 250);
+    const getDefaultChatWidth = () => Math.max(window.innerWidth * 0.3, 300);
     const [chatWidth, setChatWidth] = useState(getDefaultChatWidth());
 
     useEffect(() => {
