@@ -22,7 +22,7 @@ export const useGetPendingInvites = (): UseGetPendingInvitesResult => {
       const data = await getPendingInvites();
       setInvites(data);
     } catch (err: any) {
-      setError(err.message || 'Не удалось загрузить приглашения');
+      setError(err.message || 'Ошибка при загрузке приглашений');
     } finally {
       setLoading(false);
     }
@@ -32,10 +32,5 @@ export const useGetPendingInvites = (): UseGetPendingInvitesResult => {
     loadInvites();
   }, []);
 
-  return {
-    invites,
-    loading,
-    error,
-    refreshInvites: loadInvites,
-  };
+  return { invites, loading, error, refreshInvites: loadInvites };
 };
