@@ -41,8 +41,10 @@ export const createGroup = async (data: GroupRequest): Promise<GroupResponse> =>
 };
 
 
-// Получить группы, в которых состоит пользователь
-export const getUserGroups = async (): Promise<GroupResponse[]> => {
+import { GroupMemberResponse } from '@/types/group.types';
+
+// Получить группы, в которых ты участник
+export const getMemberGroups = async (): Promise<GroupMemberResponse[]> => {
   const accessToken = localStorage.getItem('access_token');
 
   const response = await fetch(`${API_URL}/api/v1/groups/member/`, {
@@ -116,3 +118,20 @@ export const removeUserFromGroup = async (
   return await response.json();
 };
 
+// Получить группы пользователя
+export const getUserGroups = async (): Promise<GroupResponse[]> => {
+  const accessToken = localStorage.getItem('access_token');
+
+  const response = await fetch(`${API_URL}/api/v1/groups/user/`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Не удалось загрузить группы');
+  }
+
+  return await response.json();
+};

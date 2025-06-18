@@ -14,3 +14,10 @@ export interface Group {
   name: string;
   creator_id: number;
 }
+
+export interface GroupMemberResponse {
+  id: number;
+  name: string;
+  creator_id: number;
+  members: number[];
+}
