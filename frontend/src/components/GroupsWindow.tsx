@@ -468,3 +468,10 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
 };
 
 export default GroupsWindow;
+
+interface GroupsWindowProps {
+  onClose: () => void;
+  groupWidth: number;
+  setGroupWidth: (width: number) => void;
+  isOpen: boolean;
+}
