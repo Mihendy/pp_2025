@@ -174,7 +174,8 @@ async def list_incoming_invites(current_user=Depends(get_current_user)):
     """
     Получить все входящие инвайты для текущего пользователя
     """
-    query = select(Invitations).where(Invitations.c.recipient_id == current_user.id)
+    query = select(Invitations).where(Invitations.c.recipient_id == current_user.id,
+                                      Invitations.c.status == InviteStatus.PENDING)
     invites = await database.fetch_all(query)
     return [InviteResponse(**invite._mapping) for invite in invites]
 
