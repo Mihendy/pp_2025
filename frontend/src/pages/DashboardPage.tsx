@@ -94,10 +94,9 @@ const DashboardPage: React.FC = () => {
             {/* Окно групп */}
             <GroupsWindow
                 onClose={() => setIsGroupsOpen(false)}
-                groupWidth={groupWidth}
-                setGroupWidth={setGroupWidth}
                 isOpen={isGroupsOpen}
             />
+
         </div>
     );
 };
