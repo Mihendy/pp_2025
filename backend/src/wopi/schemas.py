@@ -9,3 +9,4 @@ class FileInfoResponse(BaseModel):
     Version: str
     UserCanWrite: bool
     UserFriendlyName: str
+    FilePath: str

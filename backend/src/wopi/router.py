@@ -86,6 +86,7 @@ async def list_user_files(access_token: str):
             "Version": "1",
             "UserCanWrite": can_write,
             "UserFriendlyName": user.email,
+            "FilePath": file_path,
         })
 
     return files_info
@@ -121,6 +122,7 @@ async def file_info(file_path: str, access_token: str):
         "Version": "1",
         "UserCanWrite": can_write,
         "UserFriendlyName": user.email,
+        "FilePath": file_path,
     })
 
 

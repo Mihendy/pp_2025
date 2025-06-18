@@ -105,7 +105,7 @@ const FilePermissionsModal: React.FC<Props> = ({
         setActionLoading(true);
         setError(null);
         try {
-            const resp = await fetch(`${apiUrl}/api/v1/rights/${encodeURIComponent(filePath)}/${user_id}`, {
+            const resp = await fetch(`${apiUrl}/api/v1/rights/${filePath}/${user_id}`, {
                 method: 'DELETE',
                 headers: {'Authorization': `Bearer ${accessToken}`},
             });

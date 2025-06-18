@@ -10,6 +10,8 @@ import {useDeclineInvite} from '@/hooks/useDeclineInvite';
 import {Group} from '@/types/group.types';
 import {InviteResponse} from '@/types/invite.types';
 import {fetchAllUsers} from '@/api/userApi';
+import CreateFileModal from '@/components/CreateFileModal';
+
 
 const FIXED_WIDTH = 300;
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -37,6 +39,8 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     const [recipientId, setRecipientId] = useState<string>('');
     const [newGroupLoading, setNewGroupLoading] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
+    const [showCreateFileModal, setShowCreateFileModal] = useState(false);
+
 
     // Загружаем всех пользователей для email
     const [users, setUsers] = useState<{ id: number, email: string }[]>([]);
@@ -408,9 +412,26 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
                                 📝 Создать приглашение
                             </button>
                         </div>
+                        <div style={{marginTop: 12}}>
+                            <button
+                                className="new-chat-button"
+                                onClick={() => setShowCreateFileModal(true)}
+                                style={{minWidth: 180, fontSize: 15, background: "#41316c"}}
+                            >
+                                📄 Создать файл
+                            </button>
+                        </div>
                     </div>
+
                 )}
                 {/* Модалка приглашения */}
+                {showCreateFileModal && selectedGroup && (
+                    <CreateFileModal
+                        groupId={selectedGroup.id}
+                        accessToken={localStorage.getItem('access_token') || ''}
+                        onClose={() => setShowCreateFileModal(false)}
+                    />
+                )}
                 {showInviteForm && (
                     <div className="invite-form-overlay" style={{
                         position: 'fixed',

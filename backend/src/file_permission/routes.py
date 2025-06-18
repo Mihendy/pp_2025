@@ -43,7 +43,7 @@ async def grant_file_permission(
         raise HTTPException(400, detail=str(e))
 
 
-@router.delete("/{file_path}/{user_id}", response_model=DetailResponse, responses={
+@router.delete("/{file_path:path}/{user_id}", response_model=DetailResponse, responses={
     403: {"description": "Только владелец может отзывать права"},
     404: {"description": "Право не найдено"},
 })

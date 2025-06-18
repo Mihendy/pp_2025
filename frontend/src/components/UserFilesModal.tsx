@@ -13,6 +13,7 @@ interface UserFile {
     Version: string;
     UserCanWrite: boolean;
     UserFriendlyName: string;
+    FilePath: string;
 }
 
 interface User {
@@ -94,9 +95,9 @@ const UserFilesModal: React.FC<Props> = ({isOpen, onClose, accessToken}) => {
                         </thead>
                         <tbody>
                         {files.map(f => (
-                            <tr key={f.BaseFileName + f.OwnerId} style={{borderBottom: '1px solid #333'}}>
-                                <td style={{padding: '6px 4px', fontFamily: 'monospace'}} title={f.BaseFileName}>
-                                    {f.BaseFileName}
+                            <tr key={f.FilePath} style={{borderBottom: '1px solid #333'}}>
+                                <td style={{padding: '6px 4px', fontFamily: 'monospace'}} title={f.FilePath}>
+                                    {f.FilePath}
                                 </td>
                                 <td style={{padding: '6px 4px', textAlign: 'right'}}>
                                     {f.Size ? (f.Size / 1024).toFixed(1) + ' КБ' : '—'}

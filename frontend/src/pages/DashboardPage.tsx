@@ -81,11 +81,12 @@ const DashboardPage: React.FC = () => {
                 title={isGroupsOpen ? "Скрыть группы" : "Группы"}
                 onClick={() => setIsGroupsOpen(v => !v)}
                 style={{
-                    left: isGroupsOpen ? `${groupWidth}px` : 0,
+                    left: isGroupsOpen ? `300px` : 0,    // по аналогии с chat-tab
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    zIndex: 1001,
-                    '--group-width': `${groupWidth}px`,
+                    zIndex: 1002,           // если вдруг используешь в стилях
+                    position: 'fixed',                             // обязательно!
+                    // остальное на css-класс, если есть
                 } as React.CSSProperties}
             >
                 👥

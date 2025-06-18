@@ -13,6 +13,7 @@ interface UserFile {
     Version: string;
     UserCanWrite: boolean;
     UserFriendlyName: string;
+    FilePath: string;
 }
 
 interface User {
@@ -186,25 +187,25 @@ const UserFilesPanel: React.FC<Props> = ({visible, accessToken, currentUserId}) 
                                 <tbody>
                                 {files.map(f => (
                                     <tr
-                                        key={f.BaseFileName + f.OwnerId}
+                                        key={f.FilePath + f.OwnerId}
                                         style={{
                                             borderBottom: '1px solid #333',
-                                            opacity: openFile === f.BaseFileName && iframeLoading ? 0.55 : 1
+                                            opacity: openFile === f.FilePath && iframeLoading ? 0.55 : 1
                                         }}
                                     >
                                         <td
                                             style={{
                                                 padding: '6px 4px',
                                                 fontFamily: 'monospace',
-                                                color: openFile === f.BaseFileName ? '#f1ddff' : '#c9b3fd',
+                                                color: openFile === f.FilePath ? '#f1ddff' : '#c9b3fd',
                                                 cursor: 'pointer'
                                             }}
                                             title="Открыть в Collabora"
-                                            onClick={() => openInCollabora(f.BaseFileName)}
+                                            onClick={() => openInCollabora(f.FilePath)}
                                         >
-                                            {openFile === f.BaseFileName && iframeLoading
+                                            {openFile === f.FilePath && iframeLoading
                                                 ? 'Открытие...'
-                                                : f.BaseFileName}
+                                                : f.FilePath}
                                         </td>
                                         <td style={{padding: '6px 4px', textAlign: 'right'}}>
                                             {f.Size ? (f.Size / 1024).toFixed(1) + ' КБ' : '—'}
@@ -238,7 +239,7 @@ const UserFilesPanel: React.FC<Props> = ({visible, accessToken, currentUserId}) 
                                                         cursor: 'pointer'
                                                     }}
                                                     title="Управление правами"
-                                                    onClick={() => setPermModalFile(f.BaseFileName)}
+                                                    onClick={() => setPermModalFile(f.FilePath)}
                                                 >
                                                     Права
                                                 </button>
