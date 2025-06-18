@@ -148,15 +148,17 @@ const DashboardPage: React.FC = () => {
             <GroupsWindow
                 onClose={() => setIsGroupsOpen(false)}
                 isOpen={isGroupsOpen}
+                groupWidth={groupWidth}
+                setGroupWidth={setGroupWidth}
             />
 
-      {/* Модальное окно настроек */}
-      {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
+            {/* Модальное окно настроек */}
+            {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)}/>}
 
-      {/* Модальное окно с новостями */}
-      {isNewsOpen && <NewsModal onClose={() => setIsNewsOpen(false)} />}
-    </div>
-  );
+            {/* Модальное окно с новостями */}
+            {isNewsOpen && <NewsModal onClose={() => setIsNewsOpen(false)}/>}
+        </div>
+    );
 };
 
 export default DashboardPage;
