@@ -17,8 +17,14 @@ async def revoke_permission(file_path: str, user_id: int):
         (FilePermissions.c.file_path == file_path) &
         (FilePermissions.c.user_id == user_id)
     )
-    result = await database.execute(query)
-    return result > 0
+    await database.execute(query)
+
+    query = FilePermissions.select().where(
+        (FilePermissions.c.file_path == file_path) &
+        (FilePermissions.c.user_id == user_id)
+    )
+    perm = await database.fetch_one(query)
+    return perm is None
 
 
 async def check_file_access(file_path: str, user_id: int, required_right: str):
@@ -38,9 +44,16 @@ async def check_file_access(file_path: str, user_id: int, required_right: str):
         return True
     return False
 
+
 async def get_file_owner_id(file_path: str):
     query = FilePermissions.select().where(
         (FilePermissions.c.file_path == file_path) &
         (FilePermissions.c.rights_type == RIGHT_TYPES.OWNER)
     )
     return (await database.fetch_one(query)).user_id
+
+
+async def get_permissions_for_file(file_path: str):
+    query = FilePermissions.select().where(FilePermissions.c.file_path == file_path)
+    rows = await database.fetch_all(query)
+    return [dict(row) for row in rows]

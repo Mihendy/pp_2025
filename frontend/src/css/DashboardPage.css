@@ -1,13 +1,12 @@
-  .dashboard-container {
-    background-color: #8e2de2; /* Ярко-фиолетовый фон */
+.dashboard-container {
     color: white;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
+}
 
-  .dashboard-footer {
+.dashboard-footer {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -19,53 +18,54 @@
     background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 999;
-  }
+}
 
-  .dashboard-icon {
+.dashboard-icon {
     margin: 0 10px; /* Расстояние между иконками */
     padding: 10px;
     font-size: 24px; /* Размер как у иконки чата */
     border-radius: 50%;
     cursor: pointer;
     transition: background-color 0.3s ease;
-  }
+}
 
-  .dashboard-icon:hover {
+.dashboard-icon:hover {
     background-color: rgba(255, 255, 255, 0.2);
-  }
+}
 
-  .settings {
+.settings {
     color: #b36af7;
-  }
+}
 
-  .news {
+.news {
     color: #f0f0f0;
-  }
+}
 
-  .apps {
+.apps {
     color: #fff;
-  }
+}
 
-  .chat-icon {
+.chat-icon {
     position: fixed;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
     background-color: rgba(255, 255, 255, 0.2);
     color: white;
-    border-radius: 50%;    /* именно круг */
+    border-radius: 50%; /* именно круг */
     padding: 10px;
     font-size: 24px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     z-index: 1000;
-  }
-  .chat-icon:hover {
+}
+
+.chat-icon:hover {
     background-color: rgba(255, 255, 255, 0.4);
-  }
+}
 
 
-  .chat-tab {
+.chat-tab {
     position: fixed;
     top: 50%;
     /* right задаём через style */
@@ -79,89 +79,133 @@
     border: none;
     cursor: pointer;
     z-index: 1002;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
     min-width: 48px;
-    transition:
-      background 0.3s,
-      box-shadow 0.3s,
-      padding-left 0.2s;
-  }
-  .chat-tab:hover {
+    transition: background 0.3s,
+    box-shadow 0.3s,
+    padding-left 0.2s;
+}
+
+.chat-tab:hover {
     background: #b36af7;
     padding-left: 38px;
-    box-shadow: -6px 0 18px rgba(0,0,0,0.18);
-  }
+    box-shadow: -6px 0 18px rgba(0, 0, 0, 0.18);
+}
+
 .groups-tab {
-  position: fixed;
-  top: 50%;
-  /* left задаётся через style */
-  transform: translateY(-50%);
-  background: #8e2de2;
-  color: #fff;
-  border-radius: 0 6px 6px 0;
-  padding: 12px 28px 12px 24px;
-  font-size: 24px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.15);
-  min-width: 48px;
-  transition:
-    background 0.3s,
+    position: fixed;
+    top: 50%;
+    /* left задаётся через style */
+    transform: translateY(-50%);
+    background: #8e2de2;
+    color: #fff;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 28px 12px 24px;
+    font-size: 24px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    min-width: 48px;
+    transition: background 0.3s,
     box-shadow 0.3s,
     padding-left 0.2s;
 }
 
 .groups-tab:hover {
-  background: #b36af7;
-  padding-left: 38px;
-  box-shadow: 6px 0 18px rgba(0,0,0,0.18);
+    background: #b36af7;
+    padding-left: 38px;
+    box-shadow: 6px 0 18px rgba(0, 0, 0, 0.18);
 }
+
 .group-details {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .group-details-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .back-button {
-  font-size: 18px;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
+    font-size: 18px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
 }
 
 .group-info {
-  font-size: 12px;
-  color: #aaa;
-  margin-top: 4px;
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 4px;
 }
 
 .create-invite-button {
-  background-color: #8e2de2;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    background-color: #8e2de2;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .create-invite-button:hover {
-  background-color: #b36af7;
+    background-color: #b36af7;
 }
 
 .group-footer-above {
-  margin-top: auto;
-  padding-top: 16px;
-  display: flex;
-  justify-content: center;
+    margin-top: auto;
+    padding-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+/* модальное окно, если еще нет */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1300;
+    background: rgba(20, 15, 35, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #222135;
+    border-radius: 18px;
+    box-shadow: 0 2px 22px #0004;
+    padding: 26px 30px 24px 30px;
+    color: #fff;
+    min-width: 340px;
+    max-width: 700px;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+/* в DashboardPage.css */
+.user-files-panel table th, .user-files-panel table td {
+    border-bottom: 1px solid #28224a;
+    padding: 7px 4px;
+}
+
+.user-files-panel table th {
+    background: none;
+    color: #c5bbec;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.user-files-panel table tr:last-child td {
+    border-bottom: none;
 }
