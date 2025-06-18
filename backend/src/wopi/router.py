@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -14,6 +15,7 @@ from file_permission.schemas import RIGHT_TYPES
 from file_permission.utils import add_permission, check_file_access, get_file_owner_id
 from models.utils import MessageResponse, DetailResponse
 from wopi.schemas import FileInfoResponse
+from wopi.utils import get_user_file_paths
 
 logging.basicConfig(
     format='%(levelname)s:     %(message)s',
@@ -41,7 +43,52 @@ async def file_contents(file_path: str, request: Request, access_token: str):
         S3_CLIENT.put_object(Bucket=WOPI_BUCKET, Key=file_path, Body=content)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error writing file to S3: " + str(e))
-    return Response(status_code=200)
+    last_modified_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    return JSONResponse(content={"LastModifiedTime": last_modified_str}, status_code=200)
+
+
+@router.get("/files", response_model=list[FileInfoResponse], responses={
+    401: {"description": "Unauthorized"},
+})
+async def list_user_files(access_token: str):
+    """Вернуть список файлов, к которым у пользователя есть доступ"""
+
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Missing token")
+
+    user = await get_user_by_token(access_token)
+
+    # Получаем список файлов, к которым есть доступ (должна быть реализована)
+    # file_paths = await get_user_files(user.id)
+    # Пример заглушки:
+    file_paths = await get_user_file_paths(user.id)  # Должна возвращать список путей файлов
+
+    files_info = []
+    for file_path in file_paths:
+        key = unquote(file_path)
+        try:
+            metadata = S3_CLIENT.head_object(Bucket=WOPI_BUCKET, Key=key)
+        except ClientError as e:
+            # если файла нет в бакете - пропускаем
+            if e.response["Error"]["Code"] == "404":
+                continue
+            else:
+                raise HTTPException(status_code=500, detail="S3 error: " + str(e))
+
+        can_write = await check_file_access(file_path, user.id, RIGHT_TYPES.EDITOR)
+        owner_id = await get_file_owner_id(file_path)
+
+        files_info.append({
+            "BaseFileName": Path(key).name,
+            "Size": metadata["ContentLength"],
+            "OwnerId": owner_id,
+            "UserId": user.id,
+            "Version": "1",
+            "UserCanWrite": can_write,
+            "UserFriendlyName": user.email,
+        })
+
+    return files_info
 
 
 @router.get("/files/{file_path:path}", response_model=FileInfoResponse, responses={

@@ -24,3 +24,4 @@ class FilePermissionGrant(BaseModel):
 class FilePermissionRevoke(BaseModel):
     file_path: str
     user_id: int
+

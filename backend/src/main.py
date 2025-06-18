@@ -18,6 +18,12 @@ from file_permission.schemas import RIGHT_TYPES
 from file_permission.utils import check_file_access
 from wopi.router import router as wopi_router
 
+from pydantic import BaseModel
+
+
+class CollaboraUrlResponse(BaseModel):
+    url: str
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -52,7 +58,7 @@ async def read_root():
     return {"message": "Hello, World!"}
 
 
-@app.get("/get-collabora-url")
+@app.get("/get-collabora-url", response_model=CollaboraUrlResponse)
 async def get_collabora_url(file_path: str = Query(...), credentials: HTTPAuthorizationCredentials = Depends(security)):
     ext = Path(file_path).suffix.lower()
     token = credentials.credentials

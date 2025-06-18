@@ -1,13 +1,12 @@
 // src/App.tsx
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './css/App.css';
-import { Link, useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 
-// 🔐 Импорты для авторизации
-import type { LoginRequest } from '@/types/auth.types';
-import { loginUser } from '@/api/authApi';
-import { useAuth } from '@/hooks/useAuth';
+import type {LoginRequest} from '@/types/auth.types';
+import {loginUser} from '@/api/authApi';
+import {useAuth} from '@/hooks/useAuth';
 
 const App: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -17,25 +16,19 @@ const App: React.FC = () => {
 
     const navigate = useNavigate();
 
-    // 🧪 Убран тестовый вход — теперь только через API
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setIsLoading(true);
 
-        const data: LoginRequest = { email, password };
+        const data: LoginRequest = {email, password};
 
         try {
-            console.log('📤 Отправка данных:', data);
-            const result = await loginUser(data); // 🔥 Реальный запрос к бэкенду
-            console.log('✅ Авторизация успешна:', result);
-
+            const result = await loginUser(data);
             localStorage.setItem('access_token', result.access_token);
             localStorage.setItem('refresh_token', result.refresh_token);
-
             navigate('/dashboard');
         } catch (err: any) {
-            console.error('❌ Ошибка авторизации:', err.message);
             setError(err.message || 'Неверные данные');
         } finally {
             setIsLoading(false);
@@ -43,52 +36,57 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="login-container">
-            <h1 className="welcome-text">ДОБРО ПОЖАЛОВАТЬ!</h1>
+        <div className="auth-container">
+            <h1 className="auth-title">Вход в аккаунт</h1>
+            <form onSubmit={handleSubmit} className="auth-form">
+                {error && <div className="auth-error">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="register-form">
-                {error && <p className="error-message">{error}</p>}
+                <div className="input-group">
+                    <label className="label">Почта</label>
+                    <input
+                        name="email"
+                        type="email"
+                        className="input-field"
+                        placeholder="Введите почту"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        autoComplete="email"
+                    />
+                </div>
 
-                <label className="label">Email</label>
-                <input
-                    name="email"
-                    type="email"
-                    className="input-field"
-                    placeholder="Введите почту"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
-
-                <label className="label">Пароль</label>
-                <input
-                    name="password"
-                    type="password"
-                    className="input-field"
-                    placeholder="Введите пароль"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
+                <div className="input-group">
+                    <label className="label">Пароль</label>
+                    <input
+                        name="password"
+                        type="password"
+                        className="input-field"
+                        placeholder="Введите пароль"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        autoComplete="current-password"
+                    />
+                </div>
 
                 <button
                     type="submit"
-                    className="test-login-button"
+                    className="auth-button"
                     disabled={isLoading}
                 >
                     {isLoading ? 'Загрузка...' : 'Войти'}
-                    <i className="arrow-icon">&#8594;</i>
+                    <span className="arrow-icon">&#8594;</span>
                 </button>
             </form>
 
-            <p className="register-link">
+            <div className="auth-bottom-link">
                 Нет аккаунта?{' '}
-                <Link to="/register" style={{ color: 'white', textDecoration: 'underline' }}>
+                <Link to="/register" className="auth-link">
                     Зарегистрируйтесь
                 </Link>
-            </p>
+            </div>
         </div>
     );
 };

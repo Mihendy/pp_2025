@@ -1,11 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from auth.utils import get_current_user
 from auth.tables import User
 from file_permission.utils import add_permission, revoke_permission, check_file_access
 from file_permission.schemas import RIGHT_TYPES, FilePermissionGrant
 from models.utils import DetailResponse
+from file_permission.utils import get_permissions_for_file
 
 router = APIRouter(prefix="/rights")
+
+
+@router.get("/", response_model=list[FilePermissionGrant], responses={
+    403: {"description": "Только владелец может просматривать права"},
+    404: {"description": "Файл не найден"},
+})
+async def list_file_permissions(
+        file_path: str = Query(..., description="Путь к файлу"),
+        current_user: User = Depends(get_current_user),
+):
+    # Проверяем, что юзер владелец файла
+    if not await check_file_access(file_path, current_user.id, RIGHT_TYPES.OWNER):
+        raise HTTPException(403, detail="Только владелец может просматривать права")
+
+    permissions = await get_permissions_for_file(file_path)
+    return permissions
 
 
 @router.post("/", response_model=DetailResponse, responses={

@@ -1,14 +1,14 @@
 // src/components/RegisterForm.tsx
 
-import React, { useState } from 'react';
-import { registerUser } from '@/api/authApi';
-import type { RegisterRequest } from '@/types/auth.types';
+import React, {useState} from 'react';
+import {registerUser} from '@/api/authApi';
+import type {RegisterRequest} from '@/types/auth.types';
 
 interface RegisterFormProps {
     onRegisterSuccess?: () => void;
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({onRegisterSuccess}) => {
     const [formData, setFormData] = useState<RegisterRequest>({
         email: '',
         password: '',
@@ -36,12 +36,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
         setError(null);
 
         try {
-            console.log('📤 Отправка данных:', formData);
-            const result = await registerUser(formData);
-            console.log('✅ Регистрация успешна:', result);
+            await registerUser(formData);
             if (onRegisterSuccess) onRegisterSuccess();
         } catch (err: any) {
-            console.error('❌ Ошибка регистрации:', err.message);
             setError(err.message || 'Не удалось зарегистрироваться');
         } finally {
             setIsLoading(false);
@@ -49,8 +46,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="register-form">
-            {error && <p className="error-message">{error}</p>}
+        <form onSubmit={handleSubmit} className="auth-form">
+            {error && <div className="auth-error">{error}</div>}
 
             <div className="input-group">
                 <label className="label">Почта</label>
@@ -63,6 +60,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
                     onChange={handleChange}
                     required
                     disabled={isLoading}
+                    autoComplete="email"
                 />
             </div>
 
@@ -74,9 +72,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
                     className="input-field"
                     placeholder="Введите пароль"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={handleChange}
                     required
                     disabled={isLoading}
+                    autoComplete="new-password"
                 />
             </div>
 
@@ -88,18 +87,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
                     className="input-field"
                     placeholder="Подтвердите пароль"
                     value={formData.password_confirm}
-                    onChange={(e) => setFormData({ ...formData, password_confirm: e.target.value })}
+                    onChange={handleChange}
                     required
                     disabled={isLoading}
+                    autoComplete="new-password"
                 />
             </div>
 
-            <button type="submit" className="next-button" disabled={isLoading}>
-                {isLoading ? 'Загрузка...' : 'Продолжить'}
-                <i className="arrow-icon">&#8594;</i>
+            <button type="submit" className="auth-button" disabled={isLoading}>
+                {isLoading ? 'Загрузка...' : 'Зарегистрироваться'}
+                <span className="arrow-icon">&#8594;</span>
             </button>
         </form>
     );
 };
 
-export { RegisterForm };
+export {RegisterForm};

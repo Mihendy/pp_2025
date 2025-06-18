@@ -26,7 +26,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
       retries: 5
       start_period: 10s
@@ -48,7 +48,7 @@ services:
     image: collabora/code
     container_name: collabora
     environment:
-      - domain=backend
+      - domain=.*
       - username=${COLLABORA_USERNAME}
       - password=${COLLABORA_PASSWORD}
     ports:
@@ -56,7 +56,7 @@ services:
     command: >
       --o:ssl.enable=false
       --o:ssl.termination=false
-      --o:trusted.hosts=backend
+      --o:trusted.hosts=*
     restart: always
     volumes:
       - collabora_data:/data
