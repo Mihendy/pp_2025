@@ -273,3 +273,75 @@
   font-size: 12px;
   color: #aaa;
 }
+
+.members-list {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.member-item strong {
+  font-size: 14px;
+}
+
+.remove-user-button {
+  background-color: transparent;
+  color: red;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.remove-user-button:hover {
+  opacity: 0.7;
+}
+
+.members-list {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.member-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.remove-user-button {
+  background-color: transparent;
+  color: red;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.remove-user-button:hover {
+  opacity: 0.7;
+}

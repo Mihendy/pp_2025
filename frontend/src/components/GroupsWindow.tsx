@@ -6,13 +6,13 @@ import { useCreateGroup } from '@/hooks/useCreateGroup';
 import { useCreatedGroups } from '@/hooks/useCreatedGroups';
 import { useCreateInvite } from '@/hooks/useCreateInvite';
 import { useGetMemberGroups } from '@/hooks/useGetMemberGroups';
+import { useGetPendingInvites } from '@/hooks/useGetPendingInvites';
 import { useAcceptInvite } from '@/hooks/useAcceptInvite';
 import { useDeclineInvite } from '@/hooks/useDeclineInvite';
 
 // Типы
 import { Group } from '@/types/group.types';
 import { InviteResponse } from '@/types/invite.types';
-import { useGetPendingInvites } from '@/hooks/useGetPendingInvites';
 
 type ResizeDimension = 'width' | 'height' | 'both';
 
@@ -48,7 +48,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
   const { onCreateGroup, loading: creating, error: createGroupError } = useCreateGroup();
   const { createInvite, loading: inviting, error: inviteError } = useCreateInvite();
 
-  // Получаем группы, в которых ты участник
+  // Группы, в которых ты состоишь
   const {
     groups: memberGroups,
     loading: loadingMemberGroups,
@@ -56,7 +56,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     refreshGroups: refreshMemberGroups,
   } = useGetMemberGroups();
 
-  // Получаем входящие приглашения
+  // Входящие приглашения
   const {
     invites: pendingInvites,
     loading: loadingInvites,
@@ -64,13 +64,11 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     refreshInvites,
   } = useGetPendingInvites();
 
-  // Принять приглашение
+  // Принять / отклонить
   const { acceptInvite, loading: accepting, error: acceptError } = useAcceptInvite();
-
-  // Отклонить приглашение
   const { declineInvite, loading: declining, error: declineError } = useDeclineInvite();
 
-  // Проверяем ID текущего пользователя
+  // ID текущего пользователя
   const userStringId = localStorage.getItem('user_id');
   const userId = userStringId ? parseInt(userStringId, 10) : -1;
 
@@ -171,7 +169,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
     }
   };
 
-  // Принятие приглашения
+  // Принять приглашение
   const handleAccept = async (invite: InviteResponse) => {
     if (!window.confirm('Принять приглашение?')) return;
 
@@ -179,13 +177,13 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
       await acceptInvite(invite.id);
       alert('Вы приняли приглашение');
       refreshInvites(); // обновляем список приглашений
-      refreshMemberGroups(); // обновляем список участия
+      refreshMemberGroups(); // обновляем "В составе"
     } catch (err: any) {
       alert(`Ошибка: ${err.message}`);
     }
   };
 
-  // Отклонение приглашения
+  // Отклонить приглашение
   const handleDecline = async (invite: InviteResponse) => {
     if (!window.confirm('Отклонить приглашение?')) return;
 
@@ -268,7 +266,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               )}
             </div>
 
-            {/* Кнопка "Мои приглашения" */}
+            {/* Мои приглашения */}
             <div className="chat-new-chat">
               <button
                 className="new-chat-button"
@@ -280,7 +278,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
               </button>
             </div>
 
-            {/* Кнопка "Группы, в которых состою" */}
+            {/* В составе */}
             <div className="chat-new-chat">
               <button
                 className="new-chat-button"
@@ -337,18 +335,15 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
 
             <div className="invites-list">
               <h4>Входящие приглашения:</h4>
-
               {loadingInvites && <p className="empty-category">Загрузка...</p>}
               {(inviteListError || acceptError || declineError) && (
                 <p className="error-message">
                   {inviteListError || acceptError || declineError}
                 </p>
               )}
-
               {!loadingInvites && pendingInvites.length === 0 && (
                 <p className="empty-category">Нет входящих приглашений</p>
               )}
-
               {!loadingInvites &&
                 pendingInvites.map((invite) => (
                   <div key={invite.id} className="invite-item">
@@ -377,7 +372,7 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
             </div>
           </div>
         ) : selectedGroup.id === -2 ? (
-          // Внутреннее окно "Группы, в которых я состою"
+          // Внутреннее окно "В составе"
           <div className="group-details">
             <header className="group-details-header">
               <button className="back-button" onClick={() => setSelectedGroup(null)}>
@@ -388,17 +383,18 @@ const GroupsWindow: React.FC<GroupsWindowProps> = ({
 
             <div className="member-groups-list">
               <h4>Вы состоите в следующих группах:</h4>
-
               {loadingMemberGroups && <p className="empty-category">Загрузка...</p>}
               {memberGroupsError && <p className="error-message">{memberGroupsError}</p>}
-
               {!loadingMemberGroups && memberGroups.length === 0 && (
                 <p className="empty-category">Вы не состоите ни в одной группе</p>
               )}
-
               {!loadingMemberGroups &&
                 memberGroups.map((group) => (
-                  <div key={group.id} className="chat-item">
+                  <div
+                    key={group.id}
+                    className="chat-item"
+                    onClick={() => openGroupDetails(group)}
+                  >
                     <strong>{group.name}</strong>
                     <small>Создатель: {group.creator_id}</small>
                   </div>
